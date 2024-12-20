@@ -1,67 +1,36 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN") {
-        navigate("/");
-      } else if (event === "SIGNED_OUT") {
-        navigate("/signin");
-      } else if (event === "USER_UPDATED") {
-        toast({
-          title: "Email confirmed",
-          description: "Your email has been confirmed. You can now sign in.",
-        });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate("/home");
       }
     });
 
-    // Check for email confirmation success
-    const hash = window.location.hash;
-    if (hash && hash.includes('error_description')) {
-      const errorDescription = decodeURIComponent(hash.split('error_description=')[1]);
-      toast({
-        title: "Error",
-        description: errorDescription,
-        variant: "destructive",
-      });
-    } else if (hash && hash.includes('access_token')) {
-      toast({
-        title: "Success",
-        description: "Email confirmed successfully. You can now sign in.",
-      });
-    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        navigate("/home");
+      }
+    });
 
     return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-      <div className="max-w-[400px] w-full mx-auto p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-900">Welcome Back</h2>
+    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
         <Auth
           supabaseClient={supabase}
-          appearance={{
-            theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: '#141413',
-                  brandAccent: '#141413',
-                }
-              }
-            }
-          }}
-          providers={[]}
-          redirectTo={`${window.location.origin}/signin`}
+          appearance={{ theme: ThemeSupa }}
+          providers={["google"]}
+          redirectTo={`${window.location.origin}/home`}
         />
       </div>
     </div>
