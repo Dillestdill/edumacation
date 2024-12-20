@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Pricing from "./pages/Pricing";
 import TeacherReviews from "./pages/TeacherReviews";
 import Challenge from "./pages/Challenge";
+import SignIn from "./components/SignIn";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/teacher-reviews" element={<TeacherReviews />} />
           <Route path="/challenge" element={<Challenge />} />
+          <Route path="/signin" element={<SignIn />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

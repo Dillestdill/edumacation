@@ -1,7 +1,28 @@
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { Session } from "@supabase/supabase-js";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+  
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/signin");
+  };
   
   return (
     <nav className="fixed w-full z-50 px-6 py-4">
@@ -20,9 +41,21 @@ const Navbar = () => {
           <a href="#faq" className="text-[#141413] hover:text-[#141413]/80 transition-colors">FAQ</a>
         </div>
 
-        <button className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors">
-          Sign in
-        </button>
+        {session ? (
+          <button 
+            onClick={handleSignOut}
+            className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
+          >
+            Sign out
+          </button>
+        ) : (
+          <button 
+            onClick={() => navigate("/signin")}
+            className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
+          >
+            Sign in
+          </button>
+        )}
       </div>
     </nav>
   );
