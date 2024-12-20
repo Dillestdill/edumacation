@@ -17,14 +17,14 @@ const Hero = () => {
       
       <div className="relative z-10 max-w-[1200px] mx-auto px-6 text-center">
         <h1 className="text-[80px] leading-[1] font-medium tracking-[-0.02em] text-[#141413] mb-8">
-          Save time &<br />money on AWS
+          Enjoy your time<br />off the clock!!
         </h1>
         
         <div className="max-w-[600px] mx-auto mb-12">
           <p className="text-xl text-[#141413]/80">
-            Savings, visibility, and infrastructure guardrails.
+            Built for teachers to teach their way!
             <br />
-            One automated platform.
+            One simple platform for all your classroom needs.
           </p>
         </div>
 
@@ -39,8 +39,8 @@ const Hero = () => {
 
         <div className="max-w-[800px] mx-auto border-4 border-gray-200 rounded-xl shadow-xl overflow-hidden">
           <img 
-            src="https://antimetal.com/images/hero/preview.png" 
-            alt="Antimetal Demo Preview" 
+            src="/classroom-preview.png" 
+            alt="EDUMACATION Platform Preview" 
             className="w-full h-auto"
           />
         </div>

@@ -1,7 +1,7 @@
 const stats = [
-  { number: "99%", label: "Customer Satisfaction" },
+  { number: "99%", label: "Teacher Satisfaction" },
   { number: "24/7", label: "Support Available" },
-  { number: "150+", label: "Countries Served" },
+  { number: "1000+", label: "Schools Using Our Platform" },
 ];
 
 const Stats = () => {
