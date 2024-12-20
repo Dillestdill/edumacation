@@ -41,18 +41,18 @@ const Challenge = () => {
     // Background color variables
     let hue = 0;
 
-    // Handle player 1 paddle movement (W and S keys)
+    // Handle player 1 paddle movement (W/S and T/A keys)
     const keys: { [key: string]: boolean } = {};
-    const handleKeyDown = (e: KeyboardEvent) => keys[e.key] = true;
-    const handleKeyUp = (e: KeyboardEvent) => keys[e.key] = false;
+    const handleKeyDown = (e: KeyboardEvent) => keys[e.key.toLowerCase()] = true;
+    const handleKeyUp = (e: KeyboardEvent) => keys[e.key.toLowerCase()] = false;
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
     function update() {
-      // Move paddle 1
-      if (keys['w'] && paddle1.y > 0) paddle1.y -= 8;
-      if (keys['s'] && paddle1.y < canvas.height - paddleHeight) paddle1.y += 8;
+      // Move paddle 1 (W/S or T/A keys)
+      if ((keys['w'] || keys['t']) && paddle1.y > 0) paddle1.y -= 8;
+      if ((keys['s'] || keys['a']) && paddle1.y < canvas.height - paddleHeight) paddle1.y += 8;
 
       // Move paddle 2 (AI control)
       if (paddle2.y + paddleHeight / 2 < ball.y) paddle2.y += 6;
@@ -147,8 +147,9 @@ const Challenge = () => {
         </div>
         <div className="p-4">
           <div className="mb-8 text-center text-white">
-            <h1 className="text-3xl font-bold mb-4">Pong Challenge</h1>
-            <p className="text-lg">Use 'W' and 'S' keys to move your paddle up and down</p>
+            <h1 className="text-3xl font-bold mb-4">EduMaCation Pong Challenge</h1>
+            <p className="text-lg">Use 'W'/'S' or 'T'/'A' keys to move your paddle up and down</p>
+            <p className="text-sm mt-2">Challenge yourself against the AI opponent!</p>
           </div>
           <canvas 
             ref={canvasRef} 
