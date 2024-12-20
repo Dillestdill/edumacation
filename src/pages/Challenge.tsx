@@ -147,8 +147,7 @@ const Challenge = () => {
         </div>
         <div className="p-4">
           <div className="mb-8 text-center text-white">
-            <h1 className="text-4xl font-bold mb-4">Welcome to the EduMaCation Challenge Arena!</h1>
-            <h2 className="text-2xl font-semibold mb-4">Test Your Skills in Pong</h2>
+            <h1 className="text-4xl font-bold mb-4">Test Your Skills in Pong</h1>
             <p className="text-lg">Use 'W'/'S' or 'T'/'A' keys to move your paddle up and down</p>
             <p className="text-sm mt-2">Challenge yourself against the AI opponent!</p>
           </div>
