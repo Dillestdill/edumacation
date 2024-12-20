@@ -10,10 +10,10 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex items-center gap-8">
-          <a href="#challenge" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Challenge</a>
           <a href="#pricing" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Pricing</a>
           <a href="#teacher-reviews" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Teacher Reviews</a>
           <a href="#faq" className="text-[#141413] hover:text-[#141413]/80 transition-colors">FAQ</a>
+          <a href="#challenge" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Challenge</a>
         </div>
 
         <button className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors">
