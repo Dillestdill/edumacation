@@ -34,7 +34,7 @@ const Hero = () => {
               <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </span>
-          Book a demo
+          Try it here !
         </button>
 
         <div className="max-w-[800px] mx-auto border-4 border-gray-200 rounded-xl shadow-xl overflow-hidden">
