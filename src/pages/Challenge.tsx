@@ -1,10 +1,13 @@
 import { useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Challenge = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scoreRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -143,7 +146,7 @@ const Challenge = () => {
       <div className="relative pt-20">
         <div 
           ref={scoreRef} 
-          className="absolute top-24 left-1/2 transform -translate-x-1/2 text-4xl font-bold text-white/80 bg-[#222222]/40 px-8 py-2 rounded-full backdrop-blur-sm z-10"
+          className="absolute top-24 left-8 text-4xl font-bold text-white/80 bg-[#222222]/40 px-8 py-2 rounded-full backdrop-blur-sm z-10"
         >
           0 - 0
         </div>
@@ -151,7 +154,13 @@ const Challenge = () => {
           <div className="mb-8 text-center text-white">
             <h1 className="text-4xl font-bold mb-4">Test Your Skills in Pong</h1>
             <p className="text-lg">Use 'W'/'S' or 'T'/'A' keys to move your paddle up and down</p>
-            <p className="text-sm mt-2">Challenge yourself against the AI opponent!</p>
+            <p className="text-sm mt-2 mb-6">Challenge yourself against the AI opponent!</p>
+            <Button 
+              onClick={() => navigate("/pricing")}
+              className="bg-highlight text-primary hover:bg-highlight/90 font-semibold text-lg px-8 py-6"
+            >
+              Unlock Full Access
+            </Button>
           </div>
           <canvas 
             ref={canvasRef} 
