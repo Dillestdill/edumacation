@@ -91,8 +91,10 @@ const Challenge = () => {
         resetBall();
       }
 
-      // Update score display
-      scoreDiv.textContent = `Player 1: ${player1Score} | Player 2: ${player2Score}`;
+      // Update score display with new styling
+      if (scoreRef.current) {
+        scoreRef.current.textContent = `${player1Score} - ${player2Score}`;
+      }
 
       // Update background color
       hue = (hue + 1) % 360;
@@ -141,9 +143,9 @@ const Challenge = () => {
       <div className="relative pt-20">
         <div 
           ref={scoreRef} 
-          className="absolute top-24 left-1/2 transform -translate-x-1/2 text-2xl font-bold text-white z-10"
+          className="absolute top-24 left-1/2 transform -translate-x-1/2 text-4xl font-bold text-white/80 bg-[#222222]/40 px-8 py-2 rounded-full backdrop-blur-sm z-10"
         >
-          Player 1: 0 | Player 2: 0
+          0 - 0
         </div>
         <div className="p-4">
           <div className="mb-8 text-center text-white">
@@ -153,7 +155,7 @@ const Challenge = () => {
           </div>
           <canvas 
             ref={canvasRef} 
-            className="mx-auto border border-white"
+            className="mx-auto border border-white/20 rounded-lg bg-[#1A1F2C]/90 backdrop-blur-sm"
           />
         </div>
       </div>
