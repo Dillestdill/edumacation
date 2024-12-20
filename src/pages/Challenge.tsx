@@ -159,7 +159,7 @@ const Challenge = () => {
               onClick={() => navigate("/pricing")}
               className="bg-highlight text-primary hover:bg-highlight/90 font-semibold text-lg px-8 py-6"
             >
-              Unlock Full Access
+              If I win you buy if I lose you buy! right?? deal!
             </Button>
           </div>
           <canvas 
