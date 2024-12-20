@@ -61,7 +61,7 @@ const SignIn = () => {
             }
           }}
           providers={[]}
-          redirectTo={window.location.origin}
+          redirectTo={`${window.location.origin}/signin`}
         />
       </div>
     </div>
