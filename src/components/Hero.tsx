@@ -39,8 +39,8 @@ const Hero = () => {
 
         <div className="max-w-[800px] mx-auto border-4 border-gray-200 rounded-xl shadow-xl overflow-hidden">
           <img 
-            src="/classroom-preview.png" 
-            alt="EDUMACATION Platform Preview" 
+            src="/lovable-uploads/a3a566b1-d141-459c-a4c4-1e80718e3f7e.png" 
+            alt="Teacher working at desk" 
             className="w-full h-auto"
           />
         </div>
