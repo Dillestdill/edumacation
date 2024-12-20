@@ -1,15 +1,23 @@
 const features = [
   {
-    title: "Intuitive Design",
-    description: "Clean interface that puts your needs first",
+    title: "Custom Lesson Plans",
+    description: "Create personalized lesson plans tailored to your classroom needs in minutes. Save hours of planning time with our intuitive platform.",
   },
   {
-    title: "Smart Automation",
-    description: "Let the system work for you while you focus on what matters",
+    title: "Education Community Unites",
+    description: "Connect with fellow educators, share resources, and grow together in our supportive teaching community.",
   },
   {
-    title: "Real-time Analytics",
-    description: "Make informed decisions with up-to-the-minute data",
+    title: "Affordable for Every Teacher",
+    description: "Access unlimited custom lesson plans for just $10/month—an investment in your time and classroom.",
+  },
+  {
+    title: "Save Hours of Lesson Planning",
+    description: "Let EduMaCation handle the heavy lifting! Create custom lesson plans tailored to your classroom in just minutes.",
+  },
+  {
+    title: "Tailored to Your Needs",
+    description: "Whether it's grade-specific, subject-focused, or goal-driven, EduMaCation delivers lesson plans personalized just for you.",
   },
 ];
 
