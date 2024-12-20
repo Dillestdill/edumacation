@@ -18,33 +18,32 @@ const Footer = () => {
           <div>
             <h3 className="font-medium mb-4">Product</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Enterprise</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+              <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
+              <li><a href="#case-studies" className="hover:text-white transition-colors">Case Studies</a></li>
+              <li><a href="#security" className="hover:text-white transition-colors">Security</a></li>
+              <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-medium mb-4">Resources</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">API Reference</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
+              <li><a href="#teacher-reviews" className="hover:text-white transition-colors">Teacher Reviews</a></li>
+              <li><a href="#api" className="hover:text-white transition-colors">API Reference</a></li>
+              <li><a href="#blog" className="hover:text-white transition-colors">Blog</a></li>
+              <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-medium mb-4">Company</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Legal</a></li>
+              <li><a href="#about" className="hover:text-white transition-colors">About</a></li>
+              <li><a href="#careers" className="hover:text-white transition-colors">Careers</a></li>
+              <li><a href="#contact" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="#legal" className="hover:text-white transition-colors">Legal</a></li>
             </ul>
           </div>
-
         </div>
         
         <div className="border-t border-white/10 mt-16 pt-8 text-accent text-sm">
