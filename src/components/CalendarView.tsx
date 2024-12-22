@@ -1,22 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
-import { Save, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-interface LessonPlan {
-  id: string;
-  title: string;
-  content: {
-    prompt: string;
-    response: string;
-  };
-  created_at: string;
-}
+import { LessonPlan } from "@/types/lessonPlan";
+import { convertDBResponseToLessonPlan } from "@/utils/lessonPlanUtils";
+import { LessonPlanList } from "./lesson-plan/LessonPlanList";
+import { LessonPlanEditor } from "./lesson-plan/LessonPlanEditor";
 
 interface CalendarViewProps {
   lessonPlans: LessonPlan[];
@@ -67,16 +57,12 @@ const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) =>
 
       if (error) throw error;
 
-      // Update local state with the new plan
-      setLocalLessonPlans(prev => [...prev, data as LessonPlan]);
-      
+      setLocalLessonPlans(prev => [...prev, convertDBResponseToLessonPlan(data)]);
       toast.success("Lesson plan saved successfully!");
-      // Only clear the text after successful save
       setLessonText("");
     } catch (error) {
       console.error('Error:', error);
       toast.error("Failed to save lesson plan");
-      // Don't clear the text if there's an error
     }
   };
 
@@ -89,7 +75,6 @@ const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) =>
 
       if (error) throw error;
 
-      // Update local state by removing the deleted plan
       setLocalLessonPlans(prev => prev.filter(plan => plan.id !== planId));
       toast.success("Lesson plan deleted successfully!");
     } catch (error) {
@@ -122,20 +107,17 @@ const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) =>
 
       if (error) throw error;
 
-      // Update local state with the updated plan
       setLocalLessonPlans(prev => 
-        prev.map(plan => plan.id === editingPlanId ? (data as LessonPlan) : plan)
+        prev.map(plan => plan.id === editingPlanId ? convertDBResponseToLessonPlan(data) : plan)
       );
 
       toast.success("Lesson plan updated successfully!");
-      // Only clear after successful update
       setLessonText("");
       setIsEditing(false);
       setEditingPlanId(null);
     } catch (error) {
       console.error('Error:', error);
       toast.error("Failed to update lesson plan");
-      // Don't clear if there's an error
     }
   };
 
@@ -152,59 +134,16 @@ const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) =>
           <h3 className="text-lg font-semibold mb-4">
             Lesson Plans for {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Selected Date'}
           </h3>
-          <div className="space-y-4">
-            <Textarea
-              value={lessonText}
-              onChange={(e) => setLessonText(e.target.value)}
-              placeholder="Enter your lesson plan here..."
-              className="min-h-[200px] w-full p-4"
-            />
-            <div className="flex justify-end gap-2">
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={isEditing ? handleUpdate : handleSave}
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-            </div>
-            <ScrollArea className="h-[200px]">
-              <div className="space-y-4">
-                {plansForSelectedDate.map((plan) => (
-                  <div key={plan.id} className="p-4 border rounded-lg">
-                    <h4 className="font-medium">{plan.title}</h4>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {format(new Date(plan.created_at), 'h:mm a')}
-                    </p>
-                    <div className="mt-2">
-                      <p className="text-sm">{plan.content.prompt}</p>
-                    </div>
-                    <div className="flex justify-end gap-2 mt-4">
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        onClick={() => handleEdit(plan)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        onClick={() => handleDelete(plan.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {plansForSelectedDate.length === 0 && (
-                  <p className="text-muted-foreground text-center py-4">
-                    No lesson plans for this date
-                  </p>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
+          <LessonPlanEditor
+            value={lessonText}
+            onChange={setLessonText}
+            onSave={isEditing ? handleUpdate : handleSave}
+          />
+          <LessonPlanList
+            plans={plansForSelectedDate}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </div>
       </div>
     </div>
