@@ -56,7 +56,15 @@ const LessonPlanning = () => {
       return;
     }
 
-    setLessonPlans(data);
+    // Transform the data to match our LessonPlan interface
+    const transformedData: LessonPlan[] = data.map(plan => ({
+      id: plan.id,
+      title: plan.title,
+      content: plan.content as { prompt: string; response: string },
+      created_at: plan.created_at
+    }));
+
+    setLessonPlans(transformedData);
   };
 
   const saveLessonPlan = async (title: string, prompt: string, response: string) => {
