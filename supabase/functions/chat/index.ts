@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Configuration, OpenAIApi } from 'https://esm.sh/openai@3.1.0'
+import OpenAI from 'https://esm.sh/openai@4.28.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,15 +15,14 @@ serve(async (req) => {
   try {
     const { message } = await req.json()
 
-    // Initialize OpenAI
-    const configuration = new Configuration({
+    // Initialize OpenAI with the new API version
+    const openai = new OpenAI({
       apiKey: Deno.env.get('OPENAI_API_KEY'),
     })
-    const openai = new OpenAIApi(configuration)
 
-    // Call OpenAI API
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4",
+    // Call OpenAI API with the new syntax
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -38,7 +37,7 @@ serve(async (req) => {
       max_tokens: 500,
     })
 
-    const response = completion.data.choices[0].message?.content || "I apologize, but I couldn't generate a response."
+    const response = completion.choices[0].message?.content || "I apologize, but I couldn't generate a response."
 
     return new Response(
       JSON.stringify({ response }),
@@ -48,6 +47,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error in chat function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
