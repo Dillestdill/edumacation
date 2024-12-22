@@ -22,13 +22,14 @@ interface CalendarViewProps {
   lessonPlans: LessonPlan[];
 }
 
-const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
+const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [lessonText, setLessonText] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
+  const [localLessonPlans, setLocalLessonPlans] = useState<LessonPlan[]>(initialLessonPlans);
 
-  const plansForSelectedDate = lessonPlans.filter(plan => 
+  const plansForSelectedDate = localLessonPlans.filter(plan => 
     selectedDate && format(new Date(plan.created_at), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
   );
 
@@ -58,12 +59,17 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
         plan_type: 'daily'
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('lesson_plans')
-        .insert([newPlan]);
+        .insert([newPlan])
+        .select('*')
+        .single();
 
       if (error) throw error;
 
+      // Update local state with the new plan
+      setLocalLessonPlans(prev => [...prev, data as LessonPlan]);
+      
       toast.success("Lesson plan saved successfully!");
       // Only clear the text after successful save
       setLessonText("");
@@ -83,6 +89,8 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
 
       if (error) throw error;
 
+      // Update local state by removing the deleted plan
+      setLocalLessonPlans(prev => prev.filter(plan => plan.id !== planId));
       toast.success("Lesson plan deleted successfully!");
     } catch (error) {
       console.error('Error:', error);
@@ -100,7 +108,7 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
     if (!editingPlanId) return;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('lesson_plans')
         .update({
           content: {
@@ -108,9 +116,16 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
             response: ""
           }
         })
-        .eq('id', editingPlanId);
+        .eq('id', editingPlanId)
+        .select('*')
+        .single();
 
       if (error) throw error;
+
+      // Update local state with the updated plan
+      setLocalLessonPlans(prev => 
+        prev.map(plan => plan.id === editingPlanId ? (data as LessonPlan) : plan)
+      );
 
       toast.success("Lesson plan updated successfully!");
       // Only clear after successful update
