@@ -42,7 +42,15 @@ const Navbar = () => {
                 window.location.pathname === '/home' ? 'font-semibold' : ''
               }`}
             >
-              Chat
+              AI Assistant
+            </a>
+            <a 
+              href="/educator-chat" 
+              className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
+                window.location.pathname === '/educator-chat' ? 'font-semibold' : ''
+              }`}
+            >
+              Educator Chat
             </a>
             <a 
               href="/lesson-planning" 

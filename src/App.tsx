@@ -10,6 +10,7 @@ import Challenge from "./pages/Challenge";
 import SignIn from "./components/SignIn";
 import UserHome from "./pages/UserHome";
 import LessonPlanning from "./pages/LessonPlanning";
+import EducatorChat from "./pages/EducatorChat";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/signin" element={<SignIn />} />
           <Route path="/home" element={<UserHome />} />
           <Route path="/lesson-planning" element={<LessonPlanning />} />
+          <Route path="/educator-chat" element={<EducatorChat />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
