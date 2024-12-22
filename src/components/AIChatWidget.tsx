@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send } from "lucide-react";
 import { toast } from "sonner";
+import FloatingButton from './chat-widget/FloatingButton';
+import WidgetMessageList from './chat-widget/WidgetMessageList';
+import WidgetMessageInput from './chat-widget/WidgetMessageInput';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,15 +15,6 @@ const AIChatWidget = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -32,7 +23,6 @@ const AIChatWidget = () => {
     setInput('');
     setIsLoading(true);
 
-    // Add user message to chat
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
 
     try {
@@ -43,19 +33,16 @@ const AIChatWidget = () => {
       if (error) {
         if (error.status === 429) {
           toast.error("The AI service is currently at capacity. Please try again in a few minutes.");
-          // Remove the user's message since we couldn't get a response
           setMessages(prev => prev.slice(0, -1));
           return;
         }
         throw error;
       }
 
-      // Add AI response to chat
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to get response. Please try again later.');
-      // Remove the user's message on error
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
@@ -64,12 +51,7 @@ const AIChatWidget = () => {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-5 right-5 w-14 h-14 bg-highlight rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform z-50"
-      >
-        {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
-      </button>
+      <FloatingButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
 
       {isOpen && (
         <div className="fixed bottom-24 right-5 w-[400px] max-w-[90vw] h-[600px] max-h-[80vh] bg-white rounded-xl shadow-xl flex flex-col z-50">
@@ -77,53 +59,13 @@ const AIChatWidget = () => {
             <h3 className="text-lg font-semibold">Instructor Dan Lesson Builder</h3>
           </div>
 
-          <ScrollArea className="flex-grow p-4">
-            <div className="space-y-4">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3 rounded-lg max-w-[80%] ${
-                    msg.role === 'user'
-                      ? 'ml-auto bg-highlight/10'
-                      : 'bg-accent/10'
-                  }`}
-                >
-                  {msg.content}
-                </div>
-              ))}
-              {isLoading && (
-                <div className="bg-accent/10 p-3 rounded-lg max-w-[80%]">
-                  Thinking...
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
-
-          <div className="p-4 border-t">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-              className="flex gap-2"
-            >
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask anything..."
-                className="flex-grow px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-highlight"
-              />
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-                className="bg-highlight hover:bg-highlight/90"
-              >
-                <Send size={18} />
-              </Button>
-            </form>
-          </div>
+          <WidgetMessageList messages={messages} isLoading={isLoading} />
+          <WidgetMessageInput
+            input={input}
+            setInput={setInput}
+            onSend={handleSendMessage}
+            isLoading={isLoading}
+          />
         </div>
       )}
     </>
