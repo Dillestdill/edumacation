@@ -66,6 +66,7 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string
+          education_level: string
           id: string
           likes: number | null
           message: string
@@ -74,6 +75,7 @@ export type Database = {
         Insert: {
           created_at?: string
           display_name: string
+          education_level?: string
           id?: string
           likes?: number | null
           message: string
@@ -82,6 +84,7 @@ export type Database = {
         Update: {
           created_at?: string
           display_name?: string
+          education_level?: string
           id?: string
           likes?: number | null
           message?: string
