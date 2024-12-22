@@ -25,7 +25,7 @@ const Navbar = () => {
   };
   
   return (
-    <nav className="fixed w-full z-50 px-6 py-4">
+    <nav className="fixed w-full z-50 px-6 py-4 bg-white shadow-sm">
       <div className="max-w-[1200px] mx-auto flex justify-between items-center">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -34,27 +34,44 @@ const Navbar = () => {
           <span className="font-medium text-[#141413]">EduMaCation</span>
         </div>
         
-        <div className="hidden md:flex items-center gap-8">
-          <a href="/pricing" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Pricing</a>
-          <a href="/teacher-reviews" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Teacher Reviews</a>
-          <a href="/challenge" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Challenge</a>
-          <a href="#faq" className="text-[#141413] hover:text-[#141413]/80 transition-colors">FAQ</a>
-        </div>
-
         {session ? (
-          <button 
-            onClick={handleSignOut}
-            className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
-          >
-            Sign out
-          </button>
+          <div className="flex items-center gap-8">
+            <a 
+              href="/home" 
+              className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
+                window.location.pathname === '/home' ? 'font-semibold' : ''
+              }`}
+            >
+              Chat
+            </a>
+            <a 
+              href="/lesson-planning" 
+              className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
+                window.location.pathname === '/lesson-planning' ? 'font-semibold' : ''
+              }`}
+            >
+              Lesson Planning
+            </a>
+            <button 
+              onClick={handleSignOut}
+              className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
         ) : (
-          <button 
-            onClick={() => navigate("/signin")}
-            className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
-          >
-            Sign in
-          </button>
+          <div className="hidden md:flex items-center gap-8">
+            <a href="/pricing" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Pricing</a>
+            <a href="/teacher-reviews" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Teacher Reviews</a>
+            <a href="/challenge" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Challenge</a>
+            <a href="#faq" className="text-[#141413] hover:text-[#141413]/80 transition-colors">FAQ</a>
+            <button 
+              onClick={() => navigate("/signin")}
+              className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
+            >
+              Sign in
+            </button>
+          </div>
         )}
       </div>
     </nav>

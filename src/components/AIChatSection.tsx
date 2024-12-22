@@ -3,39 +3,70 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface AIChatSectionProps {
   session: Session | null;
+  onSavePlan?: (title: string, prompt: string, response: string) => void;
 }
 
-const AIChatSection = ({ session }: AIChatSectionProps) => {
+const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveTitle, setSaveTitle] = useState("");
+  const [selectedMessage, setSelectedMessage] = useState<{ prompt: string; response: string } | null>(null);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || !session?.user) return;
 
-    const { error } = await supabase
-      .from('chat_history')
-      .insert([
-        {
-          user_id: session.user.id,
-          prompt: inputMessage,
-          response: "AI response will be here"
-        }
-      ]);
-
-    if (error) {
-      console.error('Error saving message:', error);
-      toast.error('Failed to send message');
-      return;
-    }
-
-    setMessages([...messages, 
-      { role: 'user', content: inputMessage },
-      { role: 'assistant', content: 'This is a placeholder response. AI integration coming soon!' }
-    ]);
+    setIsLoading(true);
+    const userMessage = inputMessage;
     setInputMessage("");
+
+    // Add user message to chat
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: { message: userMessage }
+      });
+
+      if (error) throw error;
+
+      // Add AI response to chat
+      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+
+      // Save to chat history
+      await supabase
+        .from('chat_history')
+        .insert([
+          {
+            user_id: session.user.id,
+            prompt: userMessage,
+            response: data.response
+          }
+        ]);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to get response');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = (prompt: string, response: string) => {
+    setSelectedMessage({ prompt, response });
+  };
+
+  const handleSaveConfirm = () => {
+    if (selectedMessage && saveTitle && onSavePlan) {
+      onSavePlan(saveTitle, selectedMessage.prompt, selectedMessage.response);
+      setSaveTitle("");
+      setSelectedMessage(null);
+    }
   };
 
   return (
@@ -52,8 +83,23 @@ const AIChatSection = ({ session }: AIChatSectionProps) => {
             }`}
           >
             {msg.content}
+            {msg.role === 'assistant' && onSavePlan && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="mt-2"
+                onClick={() => handleSave(messages[index - 1].content, msg.content)}
+              >
+                Save as Lesson Plan
+              </Button>
+            )}
           </div>
         ))}
+        {isLoading && (
+          <div className="bg-accent/10 mr-auto max-w-[80%] p-3 rounded-lg">
+            Thinking...
+          </div>
+        )}
       </ScrollArea>
       <div className="flex gap-2">
         <input
@@ -66,11 +112,28 @@ const AIChatSection = ({ session }: AIChatSectionProps) => {
         />
         <button
           onClick={handleSendMessage}
+          disabled={isLoading}
           className="px-6 py-2 bg-highlight text-primary rounded-lg hover:bg-highlight/90 transition-colors"
         >
           Send
         </button>
       </div>
+
+      <Dialog open={!!selectedMessage} onOpenChange={() => setSelectedMessage(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save as Lesson Plan</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Enter title for lesson plan"
+              value={saveTitle}
+              onChange={(e) => setSaveTitle(e.target.value)}
+            />
+            <Button onClick={handleSaveConfirm}>Save</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

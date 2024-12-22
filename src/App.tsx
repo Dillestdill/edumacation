@@ -9,6 +9,7 @@ import TeacherReviews from "./pages/TeacherReviews";
 import Challenge from "./pages/Challenge";
 import SignIn from "./components/SignIn";
 import UserHome from "./pages/UserHome";
+import LessonPlanning from "./pages/LessonPlanning";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/challenge" element={<Challenge />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/home" element={<UserHome />} />
+          <Route path="/lesson-planning" element={<LessonPlanning />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
