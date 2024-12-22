@@ -33,6 +33,11 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
   );
 
   const handleSave = async () => {
+    if (!lessonText.trim()) {
+      toast.error("Please enter some text for your lesson plan");
+      return;
+    }
+
     try {
       const {
         data: { session },
@@ -59,11 +64,13 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
 
       if (error) throw error;
 
-      setLessonText("");
       toast.success("Lesson plan saved successfully!");
+      // Only clear the text after successful save
+      setLessonText("");
     } catch (error) {
       console.error('Error:', error);
       toast.error("Failed to save lesson plan");
+      // Don't clear the text if there's an error
     }
   };
 
@@ -105,13 +112,15 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
 
       if (error) throw error;
 
+      toast.success("Lesson plan updated successfully!");
+      // Only clear after successful update
       setLessonText("");
       setIsEditing(false);
       setEditingPlanId(null);
-      toast.success("Lesson plan updated successfully!");
     } catch (error) {
       console.error('Error:', error);
       toast.error("Failed to update lesson plan");
+      // Don't clear if there's an error
     }
   };
 
