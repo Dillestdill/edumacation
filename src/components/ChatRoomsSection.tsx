@@ -90,14 +90,14 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
         value={activeLevel}
         onValueChange={setActiveLevel}
       >
-        <SelectTrigger className="w-full mb-4">
+        <SelectTrigger className="w-full mb-4 bg-white border-accent/20">
           <SelectValue placeholder="Select education level" />
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="elementary">Elementary School</SelectItem>
-          <SelectItem value="middle">Middle School</SelectItem>
-          <SelectItem value="high">High School</SelectItem>
-          <SelectItem value="higher">Higher Education</SelectItem>
+        <SelectContent className="bg-white border-accent/20 shadow-lg">
+          <SelectItem value="elementary" className="hover:bg-accent/10">Elementary School</SelectItem>
+          <SelectItem value="middle" className="hover:bg-accent/10">Middle School</SelectItem>
+          <SelectItem value="high" className="hover:bg-accent/10">High School</SelectItem>
+          <SelectItem value="higher" className="hover:bg-accent/10">Higher Education</SelectItem>
         </SelectContent>
       </Select>
 
