@@ -17,18 +17,29 @@ const MessageList = ({ messages, onSave }: MessageListProps) => {
       {messages.map((msg, index) => (
         <div
           key={index}
-          className={`mb-4 p-3 rounded-lg ${
+          className={`mb-6 ${
             msg.role === 'user' 
-              ? 'bg-highlight/10 ml-auto max-w-[80%]' 
-              : 'bg-accent/10 mr-auto max-w-[80%]'
+              ? 'ml-auto max-w-[80%]' 
+              : 'mr-auto max-w-[80%]'
           }`}
         >
-          {msg.content}
+          <div className="text-sm font-medium mb-2">
+            {msg.role === 'user' ? 'You' : 'AI Assistant'}
+          </div>
+          <div
+            className={`p-4 rounded-lg whitespace-pre-wrap leading-relaxed ${
+              msg.role === 'user' 
+                ? 'bg-highlight/10' 
+                : 'bg-accent/10'
+            }`}
+          >
+            {msg.content}
+          </div>
           {msg.role === 'assistant' && onSave && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="mt-2"
+              className="mt-3"
               onClick={() => onSave(messages[index - 1].content, msg.content)}
             >
               Save as Lesson Plan

@@ -24,22 +24,36 @@ const WidgetMessageList = ({ messages, isLoading }: WidgetMessageListProps) => {
 
   return (
     <ScrollArea className="flex-grow p-4">
-      <div className="space-y-4">
+      <div className="space-y-6">
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`p-3 rounded-lg max-w-[80%] ${
+            className={`${
               msg.role === 'user'
-                ? 'ml-auto bg-highlight/10'
-                : 'bg-accent/10'
+                ? 'ml-auto max-w-[80%]'
+                : 'max-w-[80%]'
             }`}
           >
-            {msg.content}
+            <div className="text-sm font-medium mb-2">
+              {msg.role === 'user' ? 'You' : 'AI Assistant'}
+            </div>
+            <div
+              className={`p-4 rounded-lg whitespace-pre-wrap leading-relaxed ${
+                msg.role === 'user'
+                  ? 'bg-highlight/10'
+                  : 'bg-accent/10'
+              }`}
+            >
+              {msg.content}
+            </div>
           </div>
         ))}
         {isLoading && (
-          <div className="bg-accent/10 p-3 rounded-lg max-w-[80%]">
-            Thinking...
+          <div className="max-w-[80%]">
+            <div className="text-sm font-medium mb-2">AI Assistant</div>
+            <div className="bg-accent/10 p-4 rounded-lg">
+              Thinking...
+            </div>
           </div>
         )}
         <div ref={messagesEndRef} />

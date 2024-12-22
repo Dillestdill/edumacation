@@ -9,19 +9,31 @@ interface ChatMessageListProps {
 const ChatMessageList = ({ messages, session }: ChatMessageListProps) => {
   return (
     <ScrollArea className="h-[500px] mb-4 p-4 border rounded-lg">
-      {messages.map((msg, index) => (
-        <div
-          key={index}
-          className={`mb-4 p-3 rounded-lg ${
-            msg.user_id === session?.user?.id
-              ? 'bg-highlight/10 ml-auto max-w-[80%]'
-              : 'bg-accent/10 mr-auto max-w-[80%]'
-          }`}
-        >
-          <div className="text-sm text-muted mb-1">{msg.display_name}</div>
-          {msg.message}
-        </div>
-      ))}
+      <div className="space-y-6">
+        {messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`${
+              msg.user_id === session?.user?.id
+                ? 'ml-auto max-w-[80%]'
+                : 'mr-auto max-w-[80%]'
+            }`}
+          >
+            <div className="text-sm font-medium text-muted mb-2">
+              {msg.display_name}
+            </div>
+            <div
+              className={`p-4 rounded-lg whitespace-pre-wrap leading-relaxed ${
+                msg.user_id === session?.user?.id
+                  ? 'bg-highlight/10'
+                  : 'bg-accent/10'
+              }`}
+            >
+              {msg.message}
+            </div>
+          </div>
+        ))}
+      </div>
     </ScrollArea>
   );
 };
