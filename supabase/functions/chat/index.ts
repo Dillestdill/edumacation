@@ -35,7 +35,9 @@ serve(async (req) => {
           }
         ],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 1500, // Increased from 500 to 1500
+        presence_penalty: 0.1, // Added to encourage more complete responses
+        frequency_penalty: 0.1, // Added to encourage more varied language
       })
 
       const response = completion.choices[0].message?.content || "I apologize, but I couldn't generate a response."
