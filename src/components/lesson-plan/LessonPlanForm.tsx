@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,7 +19,16 @@ export const LessonPlanForm = ({
   editingPlan,
   onEditComplete 
 }: LessonPlanFormProps) => {
-  const [lessonText, setLessonText] = useState(editingPlan?.content.prompt || "");
+  const [lessonText, setLessonText] = useState("");
+
+  // Update lessonText when editingPlan changes
+  useEffect(() => {
+    if (editingPlan) {
+      setLessonText(editingPlan.content.prompt);
+    } else {
+      setLessonText("");
+    }
+  }, [editingPlan]);
 
   const handleSave = async () => {
     if (!lessonText.trim()) {
@@ -43,7 +52,7 @@ export const LessonPlanForm = ({
           .update({
             content: {
               prompt: lessonText,
-              response: ""
+              response: editingPlan.content.response || ""
             }
           })
           .eq('id', editingPlan.id)
