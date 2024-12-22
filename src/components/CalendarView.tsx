@@ -51,7 +51,7 @@ const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) =>
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="glass rounded-xl shadow-lg p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <CalendarHeader 
           selectedDate={selectedDate} 
