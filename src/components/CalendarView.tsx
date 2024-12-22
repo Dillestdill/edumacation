@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Save, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface LessonPlan {
   id: string;
@@ -23,10 +25,95 @@ interface CalendarViewProps {
 const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [lessonText, setLessonText] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
 
   const plansForSelectedDate = lessonPlans.filter(plan => 
     selectedDate && format(new Date(plan.created_at), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
   );
+
+  const handleSave = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user) {
+        toast.error("You must be logged in to save lesson plans");
+        return;
+      }
+
+      const newPlan = {
+        user_id: session.user.id,
+        title: `Lesson Plan for ${format(selectedDate!, 'MMMM d, yyyy')}`,
+        content: {
+          prompt: lessonText,
+          response: ""
+        },
+        plan_type: 'daily'
+      };
+
+      const { error } = await supabase
+        .from('lesson_plans')
+        .insert([newPlan]);
+
+      if (error) throw error;
+
+      setLessonText("");
+      toast.success("Lesson plan saved successfully!");
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Failed to save lesson plan");
+    }
+  };
+
+  const handleDelete = async (planId: string) => {
+    try {
+      const { error } = await supabase
+        .from('lesson_plans')
+        .delete()
+        .eq('id', planId);
+
+      if (error) throw error;
+
+      toast.success("Lesson plan deleted successfully!");
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Failed to delete lesson plan");
+    }
+  };
+
+  const handleEdit = (plan: LessonPlan) => {
+    setLessonText(plan.content.prompt);
+    setIsEditing(true);
+    setEditingPlanId(plan.id);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingPlanId) return;
+
+    try {
+      const { error } = await supabase
+        .from('lesson_plans')
+        .update({
+          content: {
+            prompt: lessonText,
+            response: ""
+          }
+        })
+        .eq('id', editingPlanId);
+
+      if (error) throw error;
+
+      setLessonText("");
+      setIsEditing(false);
+      setEditingPlanId(null);
+      toast.success("Lesson plan updated successfully!");
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Failed to update lesson plan");
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
@@ -49,14 +136,12 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
               className="min-h-[200px] w-full p-4"
             />
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="icon">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={isEditing ? handleUpdate : handleSave}
+              >
                 <Save className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon">
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon">
-                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
             <ScrollArea className="h-[200px]">
@@ -68,7 +153,23 @@ const CalendarView = ({ lessonPlans }: CalendarViewProps) => {
                       {format(new Date(plan.created_at), 'h:mm a')}
                     </p>
                     <div className="mt-2">
-                      <p className="text-sm">{plan.content.response}</p>
+                      <p className="text-sm">{plan.content.prompt}</p>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => handleEdit(plan)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => handleDelete(plan.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
