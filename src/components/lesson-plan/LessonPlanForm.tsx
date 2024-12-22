@@ -57,9 +57,14 @@ export const LessonPlanForm = ({
           })
           .eq('id', editingPlan.id)
           .select('*')
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
+        if (!data) {
+          toast.error("Lesson plan not found");
+          onEditComplete();
+          return;
+        }
 
         const typedData = data as LessonPlanResponse;
         const convertedPlan = convertDBResponseToLessonPlan(typedData);
@@ -80,9 +85,13 @@ export const LessonPlanForm = ({
             plan_type: 'daily'
           }])
           .select('*')
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
+        if (!data) {
+          toast.error("Failed to create lesson plan");
+          return;
+        }
 
         const typedData = data as LessonPlanResponse;
         const convertedPlan = convertDBResponseToLessonPlan(typedData);
