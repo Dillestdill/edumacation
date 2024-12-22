@@ -29,7 +29,7 @@ export const useLessonPlans = (session: Session | null) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data: newPlan, error } = await supabase
         .from('lesson_plans')
         .insert([
           {
@@ -39,12 +39,21 @@ export const useLessonPlans = (session: Session | null) => {
             plan_type: planType
           }
         ])
-        .select()
+        .select('*')
         .single();
 
       if (error) throw error;
 
-      setLessonPlans(prev => [...prev, data as LessonPlan]);
+      // Explicitly type the newPlan as LessonPlan
+      const typedPlan: LessonPlan = {
+        id: newPlan.id,
+        title: newPlan.title,
+        content: newPlan.content as { prompt: string; response: string },
+        plan_type: newPlan.plan_type as 'daily' | 'weekly',
+        created_at: newPlan.created_at
+      };
+
+      setLessonPlans(prev => [...prev, typedPlan]);
       toast.success("Lesson plan saved successfully!");
     } catch (error) {
       console.error('Error:', error);
