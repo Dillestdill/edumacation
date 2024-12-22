@@ -35,9 +35,10 @@ const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
       });
 
       if (error) {
-        // Handle rate limit error specifically
-        if (error.message.includes('429')) {
+        if (error.status === 429) {
           toast.error("The AI service is currently at capacity. Please try again in a few minutes.");
+          // Remove the user's message since we couldn't get a response
+          setMessages(prev => prev.slice(0, -1));
           return;
         }
         throw error;
@@ -59,6 +60,8 @@ const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
     } catch (error) {
       console.error('Error:', error);
       toast.error('Failed to get response. Please try again later.');
+      // Remove the user's message on error
+      setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }

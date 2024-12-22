@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, X, Send } from "lucide-react";
+import { toast } from "sonner";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -39,16 +40,23 @@ const AIChatWidget = () => {
         body: { message: userMessage }
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.status === 429) {
+          toast.error("The AI service is currently at capacity. Please try again in a few minutes.");
+          // Remove the user's message since we couldn't get a response
+          setMessages(prev => prev.slice(0, -1));
+          return;
+        }
+        throw error;
+      }
 
       // Add AI response to chat
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please try again.' 
-      }]);
+      toast.error('Failed to get response. Please try again later.');
+      // Remove the user's message on error
+      setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
