@@ -3,6 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Users } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -15,10 +16,58 @@ interface ChatRoomsSectionProps {
   session: Session | null;
 }
 
+interface UserPresence {
+  user_id: string;
+  education_level: string;
+  last_seen: string;
+}
+
 const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
   const [chatRoomMessages, setChatRoomMessages] = useState<any[]>([]);
   const [newChatMessage, setNewChatMessage] = useState("");
   const [activeLevel, setActiveLevel] = useState("elementary");
+  const [activeUsers, setActiveUsers] = useState<Record<string, number>>({
+    elementary: 0,
+    middle: 0,
+    high: 0,
+    higher: 0,
+  });
+
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const channel = supabase.channel('presence-channel')
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState<UserPresence>();
+        const userCounts: Record<string, number> = {
+          elementary: 0,
+          middle: 0,
+          high: 0,
+          higher: 0,
+        };
+        
+        Object.values(state).flat().forEach((presence: UserPresence) => {
+          if (presence.education_level) {
+            userCounts[presence.education_level]++;
+          }
+        });
+        
+        setActiveUsers(userCounts);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({
+            user_id: session.user.id,
+            education_level: activeLevel,
+            last_seen: new Date().toISOString(),
+          });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user, activeLevel]);
 
   useEffect(() => {
     const channel = supabase
@@ -84,7 +133,13 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-semibold mb-6">Educator Chat Rooms</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Educator Chat Rooms</h2>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Users className="w-4 h-4" />
+          <span>{activeUsers[activeLevel]} active</span>
+        </div>
+      </div>
       
       <Select
         value={activeLevel}
@@ -94,10 +149,30 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
           <SelectValue placeholder="Select education level" />
         </SelectTrigger>
         <SelectContent className="bg-white border-accent/20 shadow-lg">
-          <SelectItem value="elementary" className="hover:bg-accent/10">Elementary School</SelectItem>
-          <SelectItem value="middle" className="hover:bg-accent/10">Middle School</SelectItem>
-          <SelectItem value="high" className="hover:bg-accent/10">High School</SelectItem>
-          <SelectItem value="higher" className="hover:bg-accent/10">Higher Education</SelectItem>
+          <SelectItem value="elementary" className="hover:bg-accent/10">
+            Elementary School
+            <span className="ml-2 text-xs text-muted-foreground">
+              ({activeUsers.elementary} active)
+            </span>
+          </SelectItem>
+          <SelectItem value="middle" className="hover:bg-accent/10">
+            Middle School
+            <span className="ml-2 text-xs text-muted-foreground">
+              ({activeUsers.middle} active)
+            </span>
+          </SelectItem>
+          <SelectItem value="high" className="hover:bg-accent/10">
+            High School
+            <span className="ml-2 text-xs text-muted-foreground">
+              ({activeUsers.high} active)
+            </span>
+          </SelectItem>
+          <SelectItem value="higher" className="hover:bg-accent/10">
+            Higher Education
+            <span className="ml-2 text-xs text-muted-foreground">
+              ({activeUsers.higher} active)
+            </span>
+          </SelectItem>
         </SelectContent>
       </Select>
 
