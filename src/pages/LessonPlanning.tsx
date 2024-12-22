@@ -30,6 +30,10 @@ const LessonPlanning = () => {
 
   const { lessonPlans, saveLessonPlan } = useLessonPlans(session);
 
+  const handleSavePlan = (title: string, prompt: string, response: string, planType: 'daily' | 'weekly') => {
+    saveLessonPlan(title, prompt, response, planType);
+  };
+
   return (
     <div className="min-h-screen bg-surface">
       <Navbar />
@@ -45,7 +49,7 @@ const LessonPlanning = () => {
           </TabsContent>
           
           <TabsContent value="chat" className="mt-6">
-            <AIChatSection session={session} onSavePlan={saveLessonPlan} />
+            <AIChatSection session={session} onSavePlan={handleSavePlan} />
           </TabsContent>
         </Tabs>
       </div>
