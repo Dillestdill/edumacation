@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { LessonPlan } from '@/types/lessonPlan';
+import { convertDBResponseToLessonPlan } from '@/utils/lessonPlanUtils';
 
 export const useLessonPlans = (session: Session | null) => {
   const [lessonPlans, setLessonPlans] = useState<LessonPlan[]>([]);
@@ -16,7 +17,7 @@ export const useLessonPlans = (session: Session | null) => {
         .eq('user_id', session.user.id);
 
       if (data) {
-        setLessonPlans(data);
+        setLessonPlans(data.map(convertDBResponseToLessonPlan));
       }
     };
 
@@ -26,7 +27,13 @@ export const useLessonPlans = (session: Session | null) => {
   const saveLessonPlan = async (plan: Omit<LessonPlan, 'id'>) => {
     const { data, error } = await supabase
       .from('lesson_plans')
-      .insert([plan])
+      .insert([{
+        user_id: session?.user?.id,
+        title: plan.title,
+        content: plan.content,
+        created_at: plan.created_at,
+        plan_type: plan.plan_type || 'daily'
+      }])
       .select()
       .single();
 

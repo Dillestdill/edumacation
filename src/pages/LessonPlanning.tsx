@@ -9,6 +9,7 @@ import AIChatSection from "@/components/AIChatSection";
 import CalendarView from "@/components/CalendarView";
 import AIChatWidget from "@/components/AIChatWidget";
 import { useLessonPlans } from "@/hooks/useLessonPlans";
+import { convertDBResponseToLessonPlan } from "@/utils/lessonPlanUtils";
 
 const LessonPlanning = () => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const LessonPlanning = () => {
             .eq('user_id', session.user.id);
           
           if (updatedPlans) {
-            setLessonPlans(updatedPlans);
+            setLessonPlans(updatedPlans.map(convertDBResponseToLessonPlan));
           }
         }
       )
