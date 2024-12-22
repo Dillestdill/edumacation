@@ -20,11 +20,16 @@ const LessonPlanning = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/signin");
+        return;
       }
       setSession(session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate("/signin");
+        return;
+      }
       setSession(session);
     });
 
@@ -45,7 +50,7 @@ const LessonPlanning = () => {
           table: 'lesson_plans',
           filter: `user_id=eq.${session.user.id}`
         },
-        async () => {
+        async (payload) => {
           // Fetch updated lesson plans
           const { data: updatedPlans } = await supabase
             .from('lesson_plans')
@@ -58,6 +63,25 @@ const LessonPlanning = () => {
         }
       )
       .subscribe();
+
+    // Initial fetch of lesson plans
+    const fetchInitialPlans = async () => {
+      const { data: plans, error } = await supabase
+        .from('lesson_plans')
+        .select('*')
+        .eq('user_id', session.user.id);
+
+      if (error) {
+        toast.error("Failed to fetch lesson plans");
+        return;
+      }
+
+      if (plans) {
+        setLessonPlans(plans.map(convertDBResponseToLessonPlan));
+      }
+    };
+
+    fetchInitialPlans();
 
     return () => {
       supabase.removeChannel(channel);
