@@ -21,7 +21,6 @@ export const LessonPlanForm = ({
 }: LessonPlanFormProps) => {
   const [lessonText, setLessonText] = useState("");
 
-  // Update lessonText when editingPlan changes
   useEffect(() => {
     if (editingPlan) {
       setLessonText(editingPlan.content.prompt);
@@ -47,6 +46,7 @@ export const LessonPlanForm = ({
       }
 
       if (editingPlan) {
+        // Update existing lesson plan
         const { data, error } = await supabase
           .from('lesson_plans')
           .update({
@@ -65,7 +65,9 @@ export const LessonPlanForm = ({
         const convertedPlan = convertDBResponseToLessonPlan(typedData);
         onPlanSaved(convertedPlan);
         onEditComplete();
+        toast.success("Lesson plan updated successfully!");
       } else {
+        // Create new lesson plan
         const { data, error } = await supabase
           .from('lesson_plans')
           .insert([{
@@ -83,11 +85,11 @@ export const LessonPlanForm = ({
         if (error) throw error;
 
         const typedData = data as LessonPlanResponse;
-        onPlanSaved(convertDBResponseToLessonPlan(typedData));
+        const convertedPlan = convertDBResponseToLessonPlan(typedData);
+        onPlanSaved(convertedPlan);
+        setLessonText("");
+        toast.success("Lesson plan saved successfully!");
       }
-
-      toast.success(editingPlan ? "Lesson plan updated successfully!" : "Lesson plan saved successfully!");
-      setLessonText("");
     } catch (error) {
       console.error('Error:', error);
       toast.error(editingPlan ? "Failed to update lesson plan" : "Failed to save lesson plan");
