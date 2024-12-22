@@ -29,6 +29,7 @@ const SignIn = () => {
         <Auth
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
+          providers={[]}
           redirectTo={`${window.location.origin}/home`}
         />
       </div>
