@@ -4,7 +4,7 @@ import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
 interface AIChatSectionProps {
@@ -34,7 +34,14 @@ const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
         body: { message: userMessage }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle rate limit error specifically
+        if (error.message.includes('429')) {
+          toast.error("The AI service is currently at capacity. Please try again in a few minutes.");
+          return;
+        }
+        throw error;
+      }
 
       // Add AI response to chat
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
@@ -51,7 +58,7 @@ const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
         ]);
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Failed to get response');
+      toast.error('Failed to get response. Please try again later.');
     } finally {
       setIsLoading(false);
     }
