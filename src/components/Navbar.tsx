@@ -23,6 +23,11 @@ const Navbar = () => {
     await supabase.auth.signOut();
     navigate("/signin");
   };
+
+  const handleFAQClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate('/#faq');
+  };
   
   return (
     <nav className="fixed w-full z-50 px-6 py-4 bg-white shadow-sm">
@@ -72,7 +77,13 @@ const Navbar = () => {
             <a href="/pricing" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Pricing</a>
             <a href="/teacher-reviews" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Teacher Reviews</a>
             <a href="/challenge" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Challenge</a>
-            <a href="#faq" className="text-[#141413] hover:text-[#141413]/80 transition-colors">FAQ</a>
+            <a 
+              href="#faq" 
+              onClick={handleFAQClick}
+              className="text-[#141413] hover:text-[#141413]/80 transition-colors"
+            >
+              FAQ
+            </a>
             <button 
               onClick={() => navigate("/signin")}
               className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
