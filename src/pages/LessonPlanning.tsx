@@ -13,6 +13,7 @@ import { useLessonPlans } from "@/hooks/useLessonPlans";
 const LessonPlanning = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
+  const { lessonPlans, saveLessonPlan, setLessonPlans } = useLessonPlans(session);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -29,7 +30,38 @@ const LessonPlanning = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const { lessonPlans, saveLessonPlan } = useLessonPlans(session);
+  // Set up real-time subscription for lesson plans
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'lesson_plans',
+          filter: `user_id=eq.${session.user.id}`
+        },
+        async () => {
+          // Fetch updated lesson plans
+          const { data: updatedPlans } = await supabase
+            .from('lesson_plans')
+            .select('*')
+            .eq('user_id', session.user.id);
+          
+          if (updatedPlans) {
+            setLessonPlans(updatedPlans);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user, setLessonPlans]);
 
   const handleSavePlan = async (title: string, prompt: string, response: string, date: Date) => {
     try {

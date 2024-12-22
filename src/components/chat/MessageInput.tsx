@@ -16,15 +16,15 @@ const MessageInput = ({ inputMessage, setInputMessage, onSend, isLoading }: Mess
         onChange={(e) => setInputMessage(e.target.value)}
         onKeyPress={(e) => e.key === 'Enter' && onSend()}
         placeholder="Ask anything..."
-        className="flex-1 px-4 py-2 rounded-lg border border-accent/20 focus:outline-none focus:border-highlight"
+        className="flex-1 px-4 py-2 rounded-lg border border-accent/20 focus:outline-none focus:border-highlight bg-white text-primary"
       />
-      <button
+      <Button
         onClick={onSend}
         disabled={isLoading}
         className="px-6 py-2 bg-highlight text-primary rounded-lg hover:bg-highlight/90 transition-colors"
       >
         Send
-      </button>
+      </Button>
     </div>
   );
 };
