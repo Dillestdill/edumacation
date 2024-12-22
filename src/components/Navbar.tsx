@@ -26,7 +26,14 @@ const Navbar = () => {
 
   const handleFAQClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate('/#faq');
+    // First navigate to home page, then scroll to FAQ section
+    navigate("/");
+    setTimeout(() => {
+      const faqSection = document.getElementById("faq");
+      if (faqSection) {
+        faqSection.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
   };
   
   return (
