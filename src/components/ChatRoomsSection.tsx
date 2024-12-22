@@ -1,16 +1,11 @@
 import { useState, useEffect } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Users } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import ChatRoomHeader from "./chat/ChatRoomHeader";
+import EducationLevelSelect from "./chat/EducationLevelSelect";
+import ChatMessageList from "./chat/ChatMessageList";
+import ChatMessageInput from "./chat/ChatMessageInput";
 
 interface ChatRoomsSectionProps {
   session: Session | null;
@@ -133,81 +128,24 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Educator Chat Rooms</h2>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users className="w-4 h-4" />
-          <span>{activeUsers[activeLevel]} active</span>
-        </div>
-      </div>
+      <ChatRoomHeader activeUsers={activeUsers[activeLevel]} />
       
-      <Select
-        value={activeLevel}
-        onValueChange={setActiveLevel}
-      >
-        <SelectTrigger className="w-full mb-4 bg-white border-accent/20">
-          <SelectValue placeholder="Select education level" />
-        </SelectTrigger>
-        <SelectContent className="bg-white border-accent/20 shadow-lg">
-          <SelectItem value="elementary" className="hover:bg-accent/10">
-            Elementary School
-            <span className="ml-2 text-xs text-muted-foreground">
-              ({activeUsers.elementary} active)
-            </span>
-          </SelectItem>
-          <SelectItem value="middle" className="hover:bg-accent/10">
-            Middle School
-            <span className="ml-2 text-xs text-muted-foreground">
-              ({activeUsers.middle} active)
-            </span>
-          </SelectItem>
-          <SelectItem value="high" className="hover:bg-accent/10">
-            High School
-            <span className="ml-2 text-xs text-muted-foreground">
-              ({activeUsers.high} active)
-            </span>
-          </SelectItem>
-          <SelectItem value="higher" className="hover:bg-accent/10">
-            Higher Education
-            <span className="ml-2 text-xs text-muted-foreground">
-              ({activeUsers.higher} active)
-            </span>
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <EducationLevelSelect
+        activeLevel={activeLevel}
+        activeUsers={activeUsers}
+        onLevelChange={setActiveLevel}
+      />
 
-      <ScrollArea className="h-[500px] mb-4 p-4 border rounded-lg">
-        {chatRoomMessages.map((msg, index) => (
-          <div
-            key={index}
-            className={`mb-4 p-3 rounded-lg ${
-              msg.user_id === session?.user?.id
-                ? 'bg-highlight/10 ml-auto max-w-[80%]'
-                : 'bg-accent/10 mr-auto max-w-[80%]'
-            }`}
-          >
-            <div className="text-sm text-muted mb-1">{msg.display_name}</div>
-            {msg.message}
-          </div>
-        ))}
-      </ScrollArea>
+      <ChatMessageList
+        messages={chatRoomMessages}
+        session={session}
+      />
 
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newChatMessage}
-          onChange={(e) => setNewChatMessage(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSendChatRoomMessage()}
-          placeholder="Type your message..."
-          className="flex-1 px-4 py-2 rounded-lg border border-accent/20 focus:outline-none focus:border-highlight"
-        />
-        <button
-          onClick={handleSendChatRoomMessage}
-          className="px-6 py-2 bg-highlight text-primary rounded-lg hover:bg-highlight/90 transition-colors"
-        >
-          Send
-        </button>
-      </div>
+      <ChatMessageInput
+        value={newChatMessage}
+        onChange={setNewChatMessage}
+        onSend={handleSendChatRoomMessage}
+      />
     </div>
   );
 };
