@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import AIChatSection from "@/components/AIChatSection";
 import CalendarView from "@/components/CalendarView";
