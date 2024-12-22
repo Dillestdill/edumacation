@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { LessonPlan } from "@/types/lessonPlan";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LessonPlan, LessonPlanResponse } from "@/types/lessonPlan";
-import { convertDBResponseToLessonPlan } from "@/utils/lessonPlanUtils";
+import { CalendarHeader } from "./lesson-plan/CalendarHeader";
+import { LessonPlanForm } from "./lesson-plan/LessonPlanForm";
 import { LessonPlanList } from "./lesson-plan/LessonPlanList";
-import { LessonPlanEditor } from "./lesson-plan/LessonPlanEditor";
 
 interface CalendarViewProps {
   lessonPlans: LessonPlan[];
@@ -14,56 +13,12 @@ interface CalendarViewProps {
 
 const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [lessonText, setLessonText] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
+  const [editingPlan, setEditingPlan] = useState<LessonPlan | null>(null);
   const [localLessonPlans, setLocalLessonPlans] = useState<LessonPlan[]>(initialLessonPlans);
 
   const plansForSelectedDate = localLessonPlans.filter(plan => 
     selectedDate && format(new Date(plan.created_at), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
   );
-
-  const handleSave = async () => {
-    if (!lessonText.trim()) {
-      toast.error("Please enter some text for your lesson plan");
-      return;
-    }
-
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.user) {
-        toast.error("You must be logged in to save lesson plans");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('lesson_plans')
-        .insert([{
-          user_id: session.user.id,
-          title: `Lesson Plan for ${format(selectedDate!, 'MMMM d, yyyy')}`,
-          content: {
-            prompt: lessonText,
-            response: ""
-          },
-          plan_type: 'daily'
-        }])
-        .select('*')
-        .single();
-
-      if (error) throw error;
-
-      const typedData = data as LessonPlanResponse;
-      setLocalLessonPlans(prev => [...prev, convertDBResponseToLessonPlan(typedData)]);
-      toast.success("Lesson plan saved successfully!");
-      setLessonText("");
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error("Failed to save lesson plan");
-    }
-  };
 
   const handleDelete = async (planId: string) => {
     try {
@@ -83,61 +38,34 @@ const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) =>
   };
 
   const handleEdit = (plan: LessonPlan) => {
-    setLessonText(plan.content.prompt);
-    setIsEditing(true);
-    setEditingPlanId(plan.id);
+    setEditingPlan(plan);
   };
 
-  const handleUpdate = async () => {
-    if (!editingPlanId) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('lesson_plans')
-        .update({
-          content: {
-            prompt: lessonText,
-            response: ""
-          }
-        })
-        .eq('id', editingPlanId)
-        .select('*')
-        .single();
-
-      if (error) throw error;
-
-      const typedData = data as LessonPlanResponse;
-      setLocalLessonPlans(prev => 
-        prev.map(plan => plan.id === editingPlanId ? convertDBResponseToLessonPlan(typedData) : plan)
-      );
-
-      toast.success("Lesson plan updated successfully!");
-      setLessonText("");
-      setIsEditing(false);
-      setEditingPlanId(null);
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error("Failed to update lesson plan");
-    }
+  const handlePlanSaved = (plan: LessonPlan) => {
+    setLocalLessonPlans(prev => {
+      if (editingPlan) {
+        return prev.map(p => p.id === plan.id ? plan : p);
+      }
+      return [...prev, plan];
+    });
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={setSelectedDate}
-          className="rounded-md border bg-transparent"
+        <CalendarHeader 
+          selectedDate={selectedDate} 
+          onDateSelect={setSelectedDate} 
         />
         <div>
           <h3 className="text-lg font-semibold mb-4">
             Lesson Plans for {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Selected Date'}
           </h3>
-          <LessonPlanEditor
-            value={lessonText}
-            onChange={setLessonText}
-            onSave={isEditing ? handleUpdate : handleSave}
+          <LessonPlanForm
+            selectedDate={selectedDate}
+            onPlanSaved={handlePlanSaved}
+            editingPlan={editingPlan}
+            onEditComplete={() => setEditingPlan(null)}
           />
           <LessonPlanList
             plans={plansForSelectedDate}
