@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { Session } from "@supabase/supabase-js";
 import AIChatSection from "@/components/AIChatSection";
 import ChatRoomsSection from "@/components/ChatRoomsSection";
+import AIChatWidget from "@/components/AIChatWidget";
 
 const UserHome = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const UserHome = () => {
           <ChatRoomsSection session={session} />
         </div>
       </div>
+      <AIChatWidget />
     </div>
   );
 };
