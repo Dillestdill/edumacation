@@ -1,3 +1,5 @@
+import { Json } from "@/integrations/supabase/types";
+
 export interface LessonPlan {
   id: string;
   title: string;
@@ -12,10 +14,7 @@ export interface LessonPlan {
 export type LessonPlanResponse = {
   id: string;
   title: string;
-  content: {
-    prompt: string;
-    response: string;
-  };
+  content: Json;
   created_at: string;
   plan_type: string;
   user_id: string;

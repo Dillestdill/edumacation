@@ -3,7 +3,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LessonPlan } from "@/types/lessonPlan";
+import { LessonPlan, LessonPlanResponse } from "@/types/lessonPlan";
 import { convertDBResponseToLessonPlan } from "@/utils/lessonPlanUtils";
 import { LessonPlanList } from "./lesson-plan/LessonPlanList";
 import { LessonPlanEditor } from "./lesson-plan/LessonPlanEditor";
@@ -39,25 +39,24 @@ const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) =>
         return;
       }
 
-      const newPlan = {
-        user_id: session.user.id,
-        title: `Lesson Plan for ${format(selectedDate!, 'MMMM d, yyyy')}`,
-        content: {
-          prompt: lessonText,
-          response: ""
-        },
-        plan_type: 'daily'
-      };
-
       const { data, error } = await supabase
         .from('lesson_plans')
-        .insert([newPlan])
+        .insert([{
+          user_id: session.user.id,
+          title: `Lesson Plan for ${format(selectedDate!, 'MMMM d, yyyy')}`,
+          content: {
+            prompt: lessonText,
+            response: ""
+          },
+          plan_type: 'daily'
+        }])
         .select('*')
         .single();
 
       if (error) throw error;
 
-      setLocalLessonPlans(prev => [...prev, convertDBResponseToLessonPlan(data)]);
+      const typedData = data as LessonPlanResponse;
+      setLocalLessonPlans(prev => [...prev, convertDBResponseToLessonPlan(typedData)]);
       toast.success("Lesson plan saved successfully!");
       setLessonText("");
     } catch (error) {
@@ -107,8 +106,9 @@ const CalendarView = ({ lessonPlans: initialLessonPlans }: CalendarViewProps) =>
 
       if (error) throw error;
 
+      const typedData = data as LessonPlanResponse;
       setLocalLessonPlans(prev => 
-        prev.map(plan => plan.id === editingPlanId ? convertDBResponseToLessonPlan(data) : plan)
+        prev.map(plan => plan.id === editingPlanId ? convertDBResponseToLessonPlan(typedData) : plan)
       );
 
       toast.success("Lesson plan updated successfully!");
