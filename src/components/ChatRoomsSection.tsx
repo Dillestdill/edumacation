@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ChatRoomsSectionProps {
   session: Session | null;
@@ -12,10 +18,9 @@ interface ChatRoomsSectionProps {
 const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
   const [chatRoomMessages, setChatRoomMessages] = useState<any[]>([]);
   const [newChatMessage, setNewChatMessage] = useState("");
-  const [activeTab, setActiveTab] = useState("elementary");
+  const [activeLevel, setActiveLevel] = useState("elementary");
 
   useEffect(() => {
-    // Subscribe to chat room messages for the active tab
     const channel = supabase
       .channel('public:chat_room_messages')
       .on(
@@ -24,7 +29,7 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
           event: 'INSERT',
           schema: 'public',
           table: 'chat_room_messages',
-          filter: `education_level=eq.${activeTab}`
+          filter: `education_level=eq.${activeLevel}`
         },
         (payload) => {
           setChatRoomMessages((current) => [...current, payload.new]);
@@ -32,13 +37,12 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
       )
       .subscribe();
 
-    // Fetch existing chat room messages for the active tab
-    fetchChatRoomMessages(activeTab);
+    fetchChatRoomMessages(activeLevel);
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [activeTab]);
+  }, [activeLevel]);
 
   const fetchChatRoomMessages = async (level: string) => {
     const { data, error } = await supabase
@@ -65,7 +69,7 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
           user_id: session.user.id,
           display_name: session.user.email?.split('@')[0] || 'Anonymous',
           message: newChatMessage,
-          education_level: activeTab
+          education_level: activeLevel
         }
       ]);
 
@@ -81,51 +85,54 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <h2 className="text-2xl font-semibold mb-6">Educator Chat Rooms</h2>
-      <Tabs defaultValue="elementary" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full mb-4">
-          <TabsTrigger value="elementary">Elementary</TabsTrigger>
-          <TabsTrigger value="middle">Middle School</TabsTrigger>
-          <TabsTrigger value="high">High School</TabsTrigger>
-          <TabsTrigger value="higher">Higher Ed</TabsTrigger>
-        </TabsList>
+      
+      <Select
+        value={activeLevel}
+        onValueChange={setActiveLevel}
+      >
+        <SelectTrigger className="w-full mb-4">
+          <SelectValue placeholder="Select education level" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="elementary">Elementary School</SelectItem>
+          <SelectItem value="middle">Middle School</SelectItem>
+          <SelectItem value="high">High School</SelectItem>
+          <SelectItem value="higher">Higher Education</SelectItem>
+        </SelectContent>
+      </Select>
 
-        {["elementary", "middle", "high", "higher"].map((level) => (
-          <TabsContent key={level} value={level} className="mt-0">
-            <ScrollArea className="h-[500px] mb-4 p-4">
-              {chatRoomMessages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`mb-4 p-3 rounded-lg ${
-                    msg.user_id === session?.user?.id
-                      ? 'bg-highlight/10 ml-auto max-w-[80%]'
-                      : 'bg-accent/10 mr-auto max-w-[80%]'
-                  }`}
-                >
-                  <div className="text-sm text-muted mb-1">{msg.display_name}</div>
-                  {msg.message}
-                </div>
-              ))}
-            </ScrollArea>
-          </TabsContent>
-        ))}
-
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newChatMessage}
-            onChange={(e) => setNewChatMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendChatRoomMessage()}
-            placeholder="Type your message..."
-            className="flex-1 px-4 py-2 rounded-lg border border-accent/20 focus:outline-none focus:border-highlight"
-          />
-          <button
-            onClick={handleSendChatRoomMessage}
-            className="px-6 py-2 bg-highlight text-primary rounded-lg hover:bg-highlight/90 transition-colors"
+      <ScrollArea className="h-[500px] mb-4 p-4 border rounded-lg">
+        {chatRoomMessages.map((msg, index) => (
+          <div
+            key={index}
+            className={`mb-4 p-3 rounded-lg ${
+              msg.user_id === session?.user?.id
+                ? 'bg-highlight/10 ml-auto max-w-[80%]'
+                : 'bg-accent/10 mr-auto max-w-[80%]'
+            }`}
           >
-            Send
-          </button>
-        </div>
-      </Tabs>
+            <div className="text-sm text-muted mb-1">{msg.display_name}</div>
+            {msg.message}
+          </div>
+        ))}
+      </ScrollArea>
+
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={newChatMessage}
+          onChange={(e) => setNewChatMessage(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSendChatRoomMessage()}
+          placeholder="Type your message..."
+          className="flex-1 px-4 py-2 rounded-lg border border-accent/20 focus:outline-none focus:border-highlight"
+        />
+        <button
+          onClick={handleSendChatRoomMessage}
+          className="px-6 py-2 bg-highlight text-primary rounded-lg hover:bg-highlight/90 transition-colors"
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 };
