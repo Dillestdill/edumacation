@@ -33,6 +33,11 @@ export const useLessonPlanForm = ({
       return;
     }
 
+    if (!selectedDate) {
+      toast.error("Please select a date for your lesson plan");
+      return;
+    }
+
     try {
       const {
         data: { session },
@@ -61,7 +66,8 @@ export const useLessonPlanForm = ({
         content: {
           prompt: lessonText,
           response: editingPlan!.content.response || ""
-        }
+        },
+        created_at: selectedDate?.toISOString()
       })
       .eq('id', editingPlan!.id)
       .select('*')
@@ -91,6 +97,7 @@ export const useLessonPlanForm = ({
           prompt: lessonText,
           response: ""
         },
+        created_at: selectedDate?.toISOString(),
         plan_type: 'daily'
       }])
       .select('*')
