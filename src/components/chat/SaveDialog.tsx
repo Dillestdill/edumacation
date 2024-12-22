@@ -1,18 +1,26 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface SaveDialogProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   setTitle: (title: string) => void;
-  onSave: (planType: 'daily' | 'weekly') => void;
+  onSave: (date: Date) => void;
 }
 
 const SaveDialog = ({ isOpen, onClose, title, setTitle, onSave }: SaveDialogProps) => {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
+  const handleSave = () => {
+    if (selectedDate) {
+      onSave(selectedDate);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -30,19 +38,19 @@ const SaveDialog = ({ isOpen, onClose, title, setTitle, onSave }: SaveDialogProp
             />
           </div>
           
-          <div className="space-y-3">
-            <Label>Plan Type</Label>
-            <RadioGroup defaultValue="daily" onValueChange={(value) => onSave(value as 'daily' | 'weekly')} className="flex flex-col space-y-2">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="daily" id="daily" />
-                <Label htmlFor="daily">Daily Plan</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="weekly" id="weekly" />
-                <Label htmlFor="weekly">Weekly Plan</Label>
-              </div>
-            </RadioGroup>
+          <div className="space-y-2">
+            <Label>Select Date</Label>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md border"
+            />
           </div>
+
+          <Button onClick={handleSave} className="w-full">
+            Save Lesson Plan
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

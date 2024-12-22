@@ -30,8 +30,28 @@ const LessonPlanning = () => {
 
   const { lessonPlans, saveLessonPlan } = useLessonPlans(session);
 
-  const handleSavePlan = (title: string, prompt: string, response: string, planType: 'daily' | 'weekly') => {
-    saveLessonPlan(title, prompt, response, planType);
+  const handleSavePlan = async (title: string, prompt: string, response: string, date: Date) => {
+    try {
+      const { data, error } = await supabase
+        .from('lesson_plans')
+        .insert([{
+          user_id: session?.user.id,
+          title,
+          content: { prompt, response },
+          created_at: date.toISOString()
+        }])
+        .select('*')
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        toast.success("Lesson plan saved successfully!");
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Failed to save lesson plan");
+    }
   };
 
   return (

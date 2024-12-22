@@ -8,7 +8,7 @@ import SaveDialog from "./chat/SaveDialog";
 
 interface AIChatSectionProps {
   session: Session | null;
-  onSavePlan?: (title: string, prompt: string, response: string, planType: 'daily' | 'weekly') => void;
+  onSavePlan?: (title: string, prompt: string, response: string, date: Date) => void;
 }
 
 const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
@@ -63,9 +63,9 @@ const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
     setSelectedMessage({ prompt, response });
   };
 
-  const handleSaveConfirm = (planType: 'daily' | 'weekly') => {
+  const handleSaveConfirm = (date: Date) => {
     if (selectedMessage && saveTitle && onSavePlan) {
-      onSavePlan(saveTitle, selectedMessage.prompt, selectedMessage.response, planType);
+      onSavePlan(saveTitle, selectedMessage.prompt, selectedMessage.response, date);
       setSaveTitle("");
       setSelectedMessage(null);
     }
