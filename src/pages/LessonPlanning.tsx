@@ -8,6 +8,8 @@ import AIChatWidget from "@/components/AIChatWidget";
 import { useLessonPlans } from "@/hooks/useLessonPlans";
 import LoadingState from "@/components/lesson-plan/LoadingState";
 import LessonPlanningTabs from "@/components/lesson-plan/LessonPlanningTabs";
+import { convertDBResponseToLessonPlan } from "@/utils/lessonPlanUtils";
+import { LessonPlanResponse } from "@/types/lessonPlan";
 
 const LessonPlanning = () => {
   const navigate = useNavigate();
@@ -54,7 +56,10 @@ const LessonPlanning = () => {
       }
 
       if (plans) {
-        setLessonPlans(plans);
+        const convertedPlans = plans.map((plan) => 
+          convertDBResponseToLessonPlan(plan as LessonPlanResponse)
+        );
+        setLessonPlans(convertedPlans);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -86,7 +91,8 @@ const LessonPlanning = () => {
       if (error) throw error;
       
       if (data) {
-        setLessonPlans(prev => [data, ...prev]);
+        const convertedPlan = convertDBResponseToLessonPlan(data as LessonPlanResponse);
+        setLessonPlans(prev => [convertedPlan, ...prev]);
         toast.success("Lesson plan saved successfully!");
       }
     } catch (error) {
