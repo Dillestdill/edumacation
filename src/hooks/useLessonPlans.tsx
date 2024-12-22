@@ -12,24 +12,51 @@ export const useLessonPlans = (session: Session | null) => {
     if (!session?.user) return;
 
     const fetchLessonPlans = async () => {
-      const { data, error } = await supabase
-        .from('lesson_plans')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('lesson_plans')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching lesson plans:', error);
+        if (error) {
+          console.error('Error fetching lesson plans:', error);
+          toast.error('Failed to fetch lesson plans');
+          return;
+        }
+
+        if (data) {
+          const convertedPlans = data.map(convertDBResponseToLessonPlan);
+          setLessonPlans(convertedPlans);
+        }
+      } catch (error) {
+        console.error('Error:', error);
         toast.error('Failed to fetch lesson plans');
-        return;
-      }
-
-      if (data) {
-        setLessonPlans(data.map(convertDBResponseToLessonPlan));
       }
     };
 
     fetchLessonPlans();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('lesson-plans-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'lesson_plans',
+          filter: `user_id=eq.${session.user.id}`
+        },
+        async () => {
+          await fetchLessonPlans();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [session?.user]);
 
   const saveLessonPlan = async (plan: Omit<LessonPlan, 'id'>) => {

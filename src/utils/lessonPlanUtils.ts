@@ -12,11 +12,19 @@ export const convertDBResponseToLessonPlan = (data: LessonPlanResponse): LessonP
     else if (typeof data.content === 'string') {
       content = JSON.parse(data.content);
     }
-    // Fallback content structure
+    // If content is neither an object nor a string, convert to string representation
     else {
       content = {
-        prompt: '',
+        prompt: String(data.content),
         response: ''
+      };
+    }
+
+    // Ensure content has the correct structure
+    if (!content.prompt || !content.hasOwnProperty('response')) {
+      content = {
+        prompt: content.prompt || String(content),
+        response: content.response || ''
       };
     }
   } catch (error) {

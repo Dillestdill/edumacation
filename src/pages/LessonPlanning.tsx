@@ -19,62 +19,61 @@ const LessonPlanning = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/signin");
         return;
       }
       setSession(session);
+      fetchLessonPlans(session);
     });
 
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         navigate("/signin");
         return;
       }
       setSession(session);
+      fetchLessonPlans(session);
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Fetch initial lesson plans
-  useEffect(() => {
-    const fetchLessonPlans = async () => {
-      if (!session?.user) return;
+  const fetchLessonPlans = async (currentSession: Session) => {
+    if (!currentSession?.user) return;
 
-      try {
-        const { data: plans, error } = await supabase
-          .from('lesson_plans')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false });
+    try {
+      const { data: plans, error } = await supabase
+        .from('lesson_plans')
+        .select('*')
+        .eq('user_id', currentSession.user.id)
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching lesson plans:', error);
-          toast.error("Failed to fetch lesson plans");
-          return;
-        }
-
-        if (plans) {
-          const convertedPlans = plans.map(convertDBResponseToLessonPlan);
-          setLessonPlans(convertedPlans);
-        }
-      } catch (error) {
-        console.error('Error:', error);
+      if (error) {
+        console.error('Error fetching lesson plans:', error);
         toast.error("Failed to fetch lesson plans");
-      } finally {
-        setIsLoading(false);
+        return;
       }
-    };
 
-    fetchLessonPlans();
-  }, [session?.user, setLessonPlans]);
+      if (plans) {
+        const convertedPlans = plans.map(convertDBResponseToLessonPlan);
+        setLessonPlans(convertedPlans);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Failed to fetch lesson plans");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Set up real-time subscription
   useEffect(() => {
     if (!session?.user) return;
 
+    // Subscribe to real-time changes
     const channel = supabase
       .channel('lesson-plans-changes')
       .on(
@@ -86,19 +85,8 @@ const LessonPlanning = () => {
           filter: `user_id=eq.${session.user.id}`
         },
         async (payload) => {
-          console.log('Received real-time update:', payload);
-          
-          // Fetch all lesson plans again to ensure consistency
-          const { data: updatedPlans } = await supabase
-            .from('lesson_plans')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .order('created_at', { ascending: false });
-          
-          if (updatedPlans) {
-            const convertedPlans = updatedPlans.map(convertDBResponseToLessonPlan);
-            setLessonPlans(convertedPlans);
-          }
+          console.log('Real-time update received:', payload);
+          await fetchLessonPlans(session);
         }
       )
       .subscribe((status) => {
@@ -108,7 +96,7 @@ const LessonPlanning = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [session?.user, setLessonPlans]);
+  }, [session?.user]);
 
   const handleSavePlan = async (title: string, prompt: string, response: string, date: Date) => {
     if (!session?.user) {
