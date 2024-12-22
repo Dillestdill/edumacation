@@ -10,11 +10,13 @@ import CalendarView from "@/components/CalendarView";
 import AIChatWidget from "@/components/AIChatWidget";
 import { useLessonPlans } from "@/hooks/useLessonPlans";
 import { convertDBResponseToLessonPlan } from "@/utils/lessonPlanUtils";
+import { LessonPlan } from "@/types/lessonPlan";
 
 const LessonPlanning = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const { lessonPlans, saveLessonPlan, setLessonPlans } = useLessonPlans(session);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -36,12 +38,45 @@ const LessonPlanning = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Set up real-time subscription for lesson plans
+  // Fetch initial lesson plans
+  useEffect(() => {
+    const fetchLessonPlans = async () => {
+      if (!session?.user) return;
+
+      try {
+        const { data: plans, error } = await supabase
+          .from('lesson_plans')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching lesson plans:', error);
+          toast.error("Failed to fetch lesson plans");
+          return;
+        }
+
+        if (plans) {
+          const convertedPlans = plans.map(convertDBResponseToLessonPlan);
+          setLessonPlans(convertedPlans);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error("Failed to fetch lesson plans");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLessonPlans();
+  }, [session?.user, setLessonPlans]);
+
+  // Set up real-time subscription
   useEffect(() => {
     if (!session?.user) return;
 
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel('lesson-plans-changes')
       .on(
         'postgres_changes',
         {
@@ -51,37 +86,24 @@ const LessonPlanning = () => {
           filter: `user_id=eq.${session.user.id}`
         },
         async (payload) => {
-          // Fetch updated lesson plans
+          console.log('Received real-time update:', payload);
+          
+          // Fetch all lesson plans again to ensure consistency
           const { data: updatedPlans } = await supabase
             .from('lesson_plans')
             .select('*')
-            .eq('user_id', session.user.id);
+            .eq('user_id', session.user.id)
+            .order('created_at', { ascending: false });
           
           if (updatedPlans) {
-            setLessonPlans(updatedPlans.map(convertDBResponseToLessonPlan));
+            const convertedPlans = updatedPlans.map(convertDBResponseToLessonPlan);
+            setLessonPlans(convertedPlans);
           }
         }
       )
-      .subscribe();
-
-    // Initial fetch of lesson plans
-    const fetchInitialPlans = async () => {
-      const { data: plans, error } = await supabase
-        .from('lesson_plans')
-        .select('*')
-        .eq('user_id', session.user.id);
-
-      if (error) {
-        toast.error("Failed to fetch lesson plans");
-        return;
-      }
-
-      if (plans) {
-        setLessonPlans(plans.map(convertDBResponseToLessonPlan));
-      }
-    };
-
-    fetchInitialPlans();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -89,21 +111,29 @@ const LessonPlanning = () => {
   }, [session?.user, setLessonPlans]);
 
   const handleSavePlan = async (title: string, prompt: string, response: string, date: Date) => {
+    if (!session?.user) {
+      toast.error("You must be logged in to save lesson plans");
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('lesson_plans')
         .insert([{
-          user_id: session?.user.id,
+          user_id: session.user.id,
           title,
           content: { prompt, response },
-          created_at: date.toISOString()
+          created_at: date.toISOString(),
+          plan_type: 'daily'
         }])
         .select('*')
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       
       if (data) {
+        const newPlan = convertDBResponseToLessonPlan(data);
+        setLessonPlans(prev => [newPlan, ...prev]);
         toast.success("Lesson plan saved successfully!");
       }
     } catch (error) {
@@ -111,6 +141,20 @@ const LessonPlanning = () => {
       toast.error("Failed to save lesson plan");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-surface">
+        <Navbar />
+        <div className="container mx-auto pt-24 px-4">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="h-32 bg-gray-200 rounded mb-4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface">
