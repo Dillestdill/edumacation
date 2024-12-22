@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -14,15 +15,15 @@ serve(async (req) => {
   try {
     const { message } = await req.json()
 
-    // Initialize OpenAI with the new API version
     const openai = new OpenAI({
       apiKey: Deno.env.get('OPENAI_API_KEY'),
     })
 
     try {
-      // Call OpenAI API with the new syntax
+      console.log('Calling OpenAI API with message:', message)
+      
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4-turbo-preview",
         messages: [
           {
             role: "system",
@@ -38,6 +39,7 @@ serve(async (req) => {
       })
 
       const response = completion.choices[0].message?.content || "I apologize, but I couldn't generate a response."
+      console.log('OpenAI API response:', response)
 
       return new Response(
         JSON.stringify({ response }),
@@ -66,7 +68,7 @@ serve(async (req) => {
       // Handle other OpenAI errors
       return new Response(
         JSON.stringify({ 
-          error: "An error occurred while processing your request. Please try again.",
+          error: openAIError.message || "An error occurred while processing your request",
           details: openAIError.message
         }),
         {
@@ -78,7 +80,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in chat function:', error)
     return new Response(
-      JSON.stringify({ error: "An unexpected error occurred. Please try again." }),
+      JSON.stringify({ 
+        error: "An unexpected error occurred",
+        details: error.message
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
