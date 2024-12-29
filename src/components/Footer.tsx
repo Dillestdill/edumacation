@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer className="bg-primary text-white mt-24 py-16">
@@ -18,16 +20,16 @@ const Footer = () => {
           <div>
             <h3 className="font-medium mb-4">Product</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#challenge" className="hover:text-white transition-colors">Challenge</a></li>
-              <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+              <li><Link to="/challenge" className="hover:text-white transition-colors">Challenge</Link></li>
+              <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-medium mb-4">Resources</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#teacher-reviews" className="hover:text-white transition-colors">Teacher Reviews</a></li>
-              <li><a href="#blog" className="hover:text-white transition-colors">Blog</a></li>
+              <li><Link to="/teacher-reviews" className="hover:text-white transition-colors">Teacher Reviews</Link></li>
+              <li><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></li>
               <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
             </ul>
           </div>
@@ -35,8 +37,8 @@ const Footer = () => {
           <div>
             <h3 className="font-medium mb-4">Company</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#about" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#contact" className="hover:text-white transition-colors">Contact</a></li>
+              <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
         </div>
@@ -45,8 +47,8 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p>© 2024 EduMaCation. All rights reserved.</p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>

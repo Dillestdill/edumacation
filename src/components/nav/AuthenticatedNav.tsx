@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface AuthenticatedNavProps {
   handleSignOut: () => Promise<void>;
@@ -9,30 +9,30 @@ const AuthenticatedNav = ({ handleSignOut }: AuthenticatedNavProps) => {
   
   return (
     <div className="flex items-center gap-8">
-      <a 
-        href="/home" 
+      <Link 
+        to="/home" 
         className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
           pathname === '/home' ? 'font-semibold' : ''
         }`}
       >
         AI Assistant
-      </a>
-      <a 
-        href="/educator-chat" 
+      </Link>
+      <Link 
+        to="/educator-chat" 
         className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
           pathname === '/educator-chat' ? 'font-semibold' : ''
         }`}
       >
         Educator Chat
-      </a>
-      <a 
-        href="/lesson-planning" 
+      </Link>
+      <Link 
+        to="/lesson-planning" 
         className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
           pathname === '/lesson-planning' ? 'font-semibold' : ''
         }`}
       >
         Lesson Planning
-      </a>
+      </Link>
       <button 
         onClick={handleSignOut}
         className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
