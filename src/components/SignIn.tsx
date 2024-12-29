@@ -102,7 +102,6 @@ const SignIn = () => {
               }
             }
           }}
-          providers={["zoom"]}
           redirectTo={`${window.location.origin}/home`}
           localization={{
             variables: {
