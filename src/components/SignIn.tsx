@@ -26,7 +26,7 @@ const SignIn = () => {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
         navigate("/home");
       } else if (event === 'USER_UPDATED') {
@@ -91,9 +91,26 @@ const SignIn = () => {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
         <Auth
           supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
+          appearance={{ 
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: '#F2FF44',
+                  brandAccent: '#E6FF00',
+                }
+              }
+            }
+          }}
           providers={["zoom"]}
           redirectTo={`${window.location.origin}/home`}
+          onError={(error) => {
+            toast({
+              title: "Authentication Error",
+              description: error.message,
+              variant: "destructive",
+            });
+          }}
         />
         <div className="mt-6 text-center">
           <Button
