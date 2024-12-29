@@ -7,9 +7,10 @@ import MessageInput from "./chat/MessageInput";
 
 interface AIChatSectionProps {
   session: Session | null;
+  onSavePlan?: (title: string, prompt: string, response: string, date: Date) => Promise<void>;
 }
 
-const AIChatSection = ({ session }: AIChatSectionProps) => {
+const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -83,7 +84,17 @@ const AIChatSection = ({ session }: AIChatSectionProps) => {
   return (
     <div className="max-w-4xl mx-auto mt-8">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <MessageList messages={messages} />
+        <MessageList 
+          messages={messages} 
+          onSave={onSavePlan ? (prompt, response) => 
+            onSavePlan(
+              `Lesson Plan from Chat ${new Date().toLocaleDateString()}`,
+              prompt,
+              response,
+              new Date()
+            ) 
+          : undefined}
+        />
         <MessageInput
           inputMessage={inputMessage}
           setInputMessage={setInputMessage}
