@@ -30,18 +30,28 @@ serve(async (req) => {
       throw new Error('No email found')
     }
 
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    // Get Stripe secret key and validate it exists
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
+    if (!stripeSecretKey) {
+      console.error('Stripe secret key not found in environment variables')
+      throw new Error('Stripe configuration error')
+    }
+
+    console.log('Initializing Stripe with secret key')
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2023-10-16',
     })
 
     // Get request body
     const { planType } = await req.json()
+    console.log('Plan type selected:', planType)
     
     // Set price ID based on plan type
     const price_id = planType === 'yearly' 
       ? "price_1QbDOXKxQfD27Tv3H6YTOFGL" // Yearly plan price ID
       : "price_1QbDO0KxQfD27Tv3OmMkuzHM" // Monthly plan price ID
 
+    console.log('Checking for existing customer with email:', email)
     const customers = await stripe.customers.list({
       email: email,
       limit: 1
@@ -50,6 +60,7 @@ serve(async (req) => {
     let customer_id = undefined
     if (customers.data.length > 0) {
       customer_id = customers.data[0].id
+      console.log('Found existing customer:', customer_id)
       // check if already subscribed to this price
       const subscriptions = await stripe.subscriptions.list({
         customer: customers.data[0].id,
@@ -59,8 +70,11 @@ serve(async (req) => {
       })
 
       if (subscriptions.data.length > 0) {
+        console.log('Customer already has an active subscription')
         throw new Error("Customer already has an active subscription")
       }
+    } else {
+      console.log('No existing customer found')
     }
 
     console.log('Creating payment session...')
