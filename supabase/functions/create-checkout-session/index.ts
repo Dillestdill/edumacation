@@ -39,7 +39,7 @@ serve(async (req) => {
       limit: 1
     })
 
-    const price_id = "price_1QbBJdKxQfD27Tv3kd7ydHoy"
+    const price_id = "price_1QbBHPKxQfD27Tv3chTZUrdU"
 
     let customer_id = undefined
     if (customers.data.length > 0) {
