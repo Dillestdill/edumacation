@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import SubscriptionGuard from "@/components/SubscriptionGuard";
 
 // Lazy load route components
 const Index = lazy(() => import("./pages/Index"));
@@ -82,7 +83,9 @@ const App = () => (
               path="/home"
               element={
                 <ProtectedRoute>
-                  <UserHome />
+                  <SubscriptionGuard>
+                    <UserHome />
+                  </SubscriptionGuard>
                 </ProtectedRoute>
               }
             />
@@ -90,7 +93,9 @@ const App = () => (
               path="/lesson-planning"
               element={
                 <ProtectedRoute>
-                  <LessonPlanning />
+                  <SubscriptionGuard>
+                    <LessonPlanning />
+                  </SubscriptionGuard>
                 </ProtectedRoute>
               }
             />
@@ -98,7 +103,9 @@ const App = () => (
               path="/educator-chat"
               element={
                 <ProtectedRoute>
-                  <EducatorChat />
+                  <SubscriptionGuard>
+                    <EducatorChat />
+                  </SubscriptionGuard>
                 </ProtectedRoute>
               }
             />
