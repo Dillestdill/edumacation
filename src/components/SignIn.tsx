@@ -36,6 +36,11 @@ const SignIn = () => {
         });
       } else if (event === 'SIGNED_OUT') {
         navigate("/signin");
+      } else if (event === 'SIGNED_UP') {
+        toast({
+          title: "Check your email",
+          description: "We've sent you a confirmation link to complete your registration",
+        });
       }
     });
 
