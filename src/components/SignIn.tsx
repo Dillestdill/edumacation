@@ -104,12 +104,29 @@ const SignIn = () => {
           }}
           providers={["zoom"]}
           redirectTo={`${window.location.origin}/home`}
-          onError={(error) => {
-            toast({
-              title: "Authentication Error",
-              description: error.message,
-              variant: "destructive",
-            });
+          localization={{
+            variables: {
+              sign_in: {
+                email_input_placeholder: "Your email address",
+                password_input_placeholder: "Your password",
+                email_label: "Email address",
+                password_label: "Password",
+                button_label: "Sign in",
+                loading_button_label: "Signing in ...",
+                social_provider_text: "Sign in with {{provider}}",
+                link_text: "Already have an account? Sign in",
+              },
+              sign_up: {
+                email_input_placeholder: "Your email address",
+                password_input_placeholder: "Your password",
+                email_label: "Email address",
+                password_label: "Password",
+                button_label: "Sign up",
+                loading_button_label: "Signing up ...",
+                social_provider_text: "Sign up with {{provider}}",
+                link_text: "Don't have an account? Sign up",
+              },
+            },
           }}
         />
         <div className="mt-6 text-center">
