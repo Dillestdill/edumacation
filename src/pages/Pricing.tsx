@@ -1,9 +1,41 @@
 import Navbar from "../components/Navbar";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Pricing = () => {
-  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Please sign in first",
+          description: "You need to be signed in to subscribe",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await supabase.functions.invoke('create-checkout-session', {
+        body: {},
+      });
+
+      if (response.error) throw response.error;
+      if (!response.data.url) throw new Error('No checkout URL returned');
+
+      window.location.href = response.data.url;
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start checkout process. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-surface">
@@ -48,7 +80,10 @@ const Pricing = () => {
                 <span>Cancel anytime</span>
               </li>
             </ul>
-            <Button className="w-full bg-primary text-white" onClick={() => navigate("/signin")}>
+            <Button 
+              className="w-full bg-primary text-white" 
+              onClick={() => handleSubscribe('monthly')}
+            >
               Subscribe Monthly
             </Button>
           </div>
@@ -85,7 +120,10 @@ const Pricing = () => {
                 <span>Priority support</span>
               </li>
             </ul>
-            <Button className="w-full bg-primary text-white" onClick={() => navigate("/signin")}>
+            <Button 
+              className="w-full bg-primary text-white" 
+              onClick={() => handleSubscribe('yearly')}
+            >
               Subscribe Yearly
             </Button>
           </div>
