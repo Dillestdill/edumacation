@@ -2,6 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
+import Logo from "./nav/Logo";
+import AuthenticatedNav from "./nav/AuthenticatedNav";
+import UnauthenticatedNav from "./nav/UnauthenticatedNav";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -38,67 +41,11 @@ const Navbar = () => {
   return (
     <nav className="fixed w-full z-50 px-6 py-4 bg-white shadow-sm">
       <div className="max-w-[1200px] mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-          <img 
-            src="/lovable-uploads/a3717d44-b0f1-4e33-9bf3-c67453939fa8.png" 
-            alt="Teacher writing at desk" 
-            className="h-10 w-auto"
-          />
-          <span className="font-medium text-[#141413]">EduMaCation</span>
-        </div>
-        
+        <Logo />
         {session ? (
-          <div className="flex items-center gap-8">
-            <a 
-              href="/home" 
-              className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
-                window.location.pathname === '/home' ? 'font-semibold' : ''
-              }`}
-            >
-              AI Assistant
-            </a>
-            <a 
-              href="/educator-chat" 
-              className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
-                window.location.pathname === '/educator-chat' ? 'font-semibold' : ''
-              }`}
-            >
-              Educator Chat
-            </a>
-            <a 
-              href="/lesson-planning" 
-              className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
-                window.location.pathname === '/lesson-planning' ? 'font-semibold' : ''
-              }`}
-            >
-              Lesson Planning
-            </a>
-            <button 
-              onClick={handleSignOut}
-              className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
+          <AuthenticatedNav handleSignOut={handleSignOut} />
         ) : (
-          <div className="hidden md:flex items-center gap-8">
-            <a href="/pricing" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Pricing</a>
-            <a href="/teacher-reviews" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Teacher Reviews</a>
-            <a href="/challenge" className="text-[#141413] hover:text-[#141413]/80 transition-colors">Challenge</a>
-            <a 
-              href="#faq" 
-              onClick={handleFAQClick}
-              className="text-[#141413] hover:text-[#141413]/80 transition-colors"
-            >
-              FAQ
-            </a>
-            <button 
-              onClick={() => navigate("/signin")}
-              className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"
-            >
-              Sign in
-            </button>
-          </div>
+          <UnauthenticatedNav handleFAQClick={handleFAQClick} />
         )}
       </div>
     </nav>
