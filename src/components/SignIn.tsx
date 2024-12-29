@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -16,10 +16,39 @@ import {
 const SignIn = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    // Check for email confirmation
+    const handleEmailConfirmation = async () => {
+      const error = searchParams.get("error");
+      const errorDescription = searchParams.get("error_description");
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: errorDescription || "An error occurred during confirmation",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If we have a access_token or refresh_token in the URL, it means the email was confirmed
+      if (searchParams.has("access_token") || searchParams.has("refresh_token")) {
+        toast({
+          title: "Email confirmed",
+          description: "Your email has been confirmed. Welcome!",
+        });
+        navigate("/home");
+      }
+    };
+
+    handleEmailConfirmation();
+  }, [searchParams, toast, navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +60,7 @@ const SignIn = () => {
             email,
             password,
             options: {
-              emailRedirectTo: `${window.location.origin}/home`,
+              emailRedirectTo: `${window.location.origin}/signin`,
             },
           })
         : await supabase.auth.signInWithPassword({
