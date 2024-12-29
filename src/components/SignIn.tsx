@@ -34,6 +34,13 @@ const SignIn = () => {
           title: "Email confirmed",
           description: "You can now sign in with your email",
         });
+      } else if (event === 'SIGNED_OUT') {
+        navigate("/signin");
+      } else if (event === 'USER_DELETED') {
+        toast({
+          title: "Account deleted",
+          description: "Your account has been successfully deleted",
+        });
       }
     });
 
@@ -86,13 +93,6 @@ const SignIn = () => {
           appearance={{ theme: ThemeSupa }}
           providers={["zoom"]}
           redirectTo={`${window.location.origin}/home`}
-          onError={(error) => {
-            toast({
-              title: "Error",
-              description: error.message,
-              variant: "destructive",
-            });
-          }}
         />
         <div className="mt-6 text-center">
           <Button
