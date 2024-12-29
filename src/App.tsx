@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
 
 // Lazy load route components
 const Index = lazy(() => import("./pages/Index"));
@@ -17,7 +18,7 @@ const LessonPlanning = lazy(() => import("./pages/LessonPlanning"));
 const EducatorChat = lazy(() => import("./pages/EducatorChat"));
 
 const LoadingFallback = () => (
-  <div className="min-h-screen bg-surface p-8">
+  <div className="min-h-screen bg-white p-8">
     <div className="max-w-7xl mx-auto space-y-8">
       <Skeleton className="h-12 w-48" />
       <div className="space-y-4">
@@ -32,11 +33,37 @@ const LoadingFallback = () => (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // Data stays fresh for 5 minutes
-      gcTime: 1000 * 60 * 30, // Cache persists for 30 minutes
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
     },
   },
 });
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const [session, setSession] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (session === null) {
+    return <LoadingFallback />;
+  }
+
+  if (!session) {
+    return <Navigate to="/signin" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -51,9 +78,30 @@ const App = () => (
             <Route path="/teacher-reviews" element={<TeacherReviews />} />
             <Route path="/challenge" element={<Challenge />} />
             <Route path="/signin" element={<SignIn />} />
-            <Route path="/home" element={<UserHome />} />
-            <Route path="/lesson-planning" element={<LessonPlanning />} />
-            <Route path="/educator-chat" element={<EducatorChat />} />
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <UserHome />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/lesson-planning"
+              element={
+                <ProtectedRoute>
+                  <LessonPlanning />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/educator-chat"
+              element={
+                <ProtectedRoute>
+                  <EducatorChat />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Suspense>
       </BrowserRouter>

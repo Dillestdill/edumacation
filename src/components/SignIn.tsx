@@ -1,143 +1,142 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import { useToast } from "./ui/use-toast";
+import { Label } from "./ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 
 const SignIn = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    // Check for email confirmation success
-    const { hash } = window.location;
-    if (hash && hash.includes('type=signup')) {
-      toast({
-        title: "Please check your email",
-        description: "A confirmation link has been sent to your email address",
-      });
-    }
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/home");
-      }
-    });
+    try {
+      const { error } = isSignUp
+        ? await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/home`,
+            },
+          })
+        : await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN') {
-        navigate("/home");
-      } else if (event === 'USER_UPDATED') {
-        toast({
-          title: "Email confirmed",
-          description: "You can now sign in with your email",
-        });
-      } else if (event === 'SIGNED_OUT') {
-        navigate("/signin");
-      } else if (event === 'INITIAL_SESSION') {
-        // Handle initial signup
+      if (error) throw error;
+
+      if (isSignUp) {
         toast({
           title: "Check your email",
           description: "We've sent you a confirmation link to complete your registration",
         });
+      } else {
+        navigate("/home");
       }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate, toast]);
-
-  const handleSubscribe = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      toast({
-        title: "Please sign in first",
-        description: "You need to be signed in to subscribe",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const response = await supabase.functions.invoke('create-checkout-session', {
-        body: {},
-      });
-
-      if (response.error) throw response.error;
-      if (!response.data.url) throw new Error('No checkout URL returned');
-
-      window.location.href = response.data.url;
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to start checkout process. Please try again.",
+        description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
       <Button
         variant="ghost"
-        className="absolute top-4 left-4 text-gray-600 hover:text-gray-900"
+        className="absolute top-4 left-4 text-black hover:text-gray-700"
         onClick={() => navigate("/")}
       >
         ← Back to Main Page
       </Button>
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ 
-            theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: '#F2FF44',
-                  brandAccent: '#E6FF00',
-                }
-              }
-            }
-          }}
-          providers={[]}
-          redirectTo={`${window.location.origin}/home`}
-          localization={{
-            variables: {
-              sign_in: {
-                email_input_placeholder: "Your email address",
-                password_input_placeholder: "Your password",
-                email_label: "Email address",
-                password_label: "Password",
-                button_label: "Sign in",
-                loading_button_label: "Signing in ...",
-                social_provider_text: "Sign in with {{provider}}",
-                link_text: "Already have an account? Sign in",
-              },
-              sign_up: {
-                email_input_placeholder: "Your email address",
-                password_input_placeholder: "Your password",
-                email_label: "Email address",
-                password_label: "Password",
-                button_label: "Sign up",
-                loading_button_label: "Signing up ...",
-                social_provider_text: "Sign up with {{provider}}",
-                link_text: "Don't have an account? Sign up",
-              },
-            },
-          }}
-        />
-        <div className="mt-6 text-center">
-          <Button
-            onClick={handleSubscribe}
-            className="bg-[#F2FF44] text-[#141413] hover:bg-[#E6FF00]"
-          >
-            Subscribe Now
-          </Button>
-        </div>
-      </div>
+
+      <Card className="w-full max-w-md bg-white border-2 border-black">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-black">
+            {isSignUp ? "Create Account" : "Welcome Back"}
+          </CardTitle>
+          <CardDescription className="text-gray-600">
+            {isSignUp
+              ? "Enter your email to create an account"
+              : "Please enter your details to sign in"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-black">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="border-2 border-black focus:ring-black"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-black">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="border-2 border-black focus:ring-black"
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-black text-white hover:bg-gray-800"
+              disabled={isLoading}
+            >
+              {isLoading
+                ? "Loading..."
+                : isSignUp
+                ? "Create Account"
+                : "Sign In"}
+            </Button>
+          </form>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-sm text-gray-600 hover:text-black underline"
+            >
+              {isSignUp
+                ? "Already have an account? Sign in"
+                : "Don't have an account? Sign up"}
+            </button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
