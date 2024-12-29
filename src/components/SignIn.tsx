@@ -36,11 +36,6 @@ const SignIn = () => {
         });
       } else if (event === 'SIGNED_OUT') {
         navigate("/signin");
-      } else if (event === 'USER_DELETED') {
-        toast({
-          title: "Account deleted",
-          description: "Your account has been successfully deleted",
-        });
       }
     });
 
