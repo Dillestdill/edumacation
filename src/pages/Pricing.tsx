@@ -20,7 +20,7 @@ const Pricing = () => {
       }
 
       const response = await supabase.functions.invoke('create-checkout-session', {
-        body: {},
+        body: { planType },
       });
 
       if (response.error) throw response.error;

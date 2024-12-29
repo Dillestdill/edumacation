@@ -34,12 +34,18 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     })
 
+    // Get request body
+    const { planType } = await req.json()
+    
+    // Set price ID based on plan type
+    const price_id = planType === 'yearly' 
+      ? "price_yearly" // Replace with your yearly plan price ID
+      : "price_monthly" // Replace with your monthly plan price ID
+
     const customers = await stripe.customers.list({
       email: email,
       limit: 1
     })
-
-    const price_id = "price_1QbBHPKxQfD27Tv3chTZUrdU"
 
     let customer_id = undefined
     if (customers.data.length > 0) {
