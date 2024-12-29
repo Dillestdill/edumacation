@@ -70,7 +70,7 @@ const SignIn = () => {
         <Auth
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
-          providers={[]}
+          providers={["zoom"]}
           redirectTo={`${window.location.origin}/home`}
         />
         <div className="mt-6 text-center">
