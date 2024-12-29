@@ -11,20 +11,34 @@ const SignIn = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for email confirmation success
+    const { hash } = window.location;
+    if (hash && hash.includes('type=signup')) {
+      toast({
+        title: "Please check your email",
+        description: "A confirmation link has been sent to your email address",
+      });
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/home");
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
         navigate("/home");
+      } else if (event === 'USER_UPDATED') {
+        toast({
+          title: "Email confirmed",
+          description: "You can now sign in with your email",
+        });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleSubscribe = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -72,6 +86,13 @@ const SignIn = () => {
           appearance={{ theme: ThemeSupa }}
           providers={["zoom"]}
           redirectTo={`${window.location.origin}/home`}
+          onError={(error) => {
+            toast({
+              title: "Error",
+              description: error.message,
+              variant: "destructive",
+            });
+          }}
         />
         <div className="mt-6 text-center">
           <Button
