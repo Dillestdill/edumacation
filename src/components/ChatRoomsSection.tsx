@@ -11,12 +11,6 @@ interface ChatRoomsSectionProps {
   session: Session | null;
 }
 
-interface UserPresence {
-  user_id: string;
-  education_level: string;
-  last_seen: string;
-}
-
 const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
   const [chatRoomMessages, setChatRoomMessages] = useState<any[]>([]);
   const [newChatMessage, setNewChatMessage] = useState("");
@@ -33,7 +27,7 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
 
     const channel = supabase.channel('presence-channel')
       .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState<UserPresence>();
+        const state = channel.presenceState<{ user_id: string; education_level: string; last_seen: string }>();
         const userCounts: Record<string, number> = {
           elementary: 0,
           middle: 0,
@@ -41,7 +35,7 @@ const ChatRoomsSection = ({ session }: ChatRoomsSectionProps) => {
           higher: 0,
         };
         
-        Object.values(state).flat().forEach((presence: UserPresence) => {
+        Object.values(state).flat().forEach((presence) => {
           if (presence.education_level) {
             userCounts[presence.education_level]++;
           }

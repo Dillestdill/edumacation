@@ -1,5 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "@supabase/supabase-js";
+import { motion } from "framer-motion";
 
 interface ChatMessageListProps {
   messages: any[];
@@ -11,8 +12,11 @@ const ChatMessageList = ({ messages, session }: ChatMessageListProps) => {
     <ScrollArea className="h-[500px] mb-4 p-4 border rounded-lg">
       <div className="space-y-6">
         {messages.map((msg, index) => (
-          <div
+          <motion.div
             key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
             className={`${
               msg.user_id === session?.user?.id
                 ? 'ml-auto max-w-[80%]'
@@ -31,7 +35,7 @@ const ChatMessageList = ({ messages, session }: ChatMessageListProps) => {
             >
               {msg.message}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </ScrollArea>
