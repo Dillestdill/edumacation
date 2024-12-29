@@ -18,6 +18,7 @@ serve(async (req) => {
   )
 
   try {
+    // Get the user's JWT token from the request headers
     const authHeader = req.headers.get('Authorization')!
     const token = authHeader.replace('Bearer ', '')
     const { data } = await supabaseClient.auth.getUser(token)
@@ -28,9 +29,17 @@ serve(async (req) => {
       throw new Error('No email found')
     }
 
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    // Initialize Stripe with the secret key from environment variables
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
+    if (!stripeSecretKey) {
+      throw new Error('Stripe secret key not found in environment variables')
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2023-10-16',
     })
+
+    console.log('Checking subscription for email:', email)
 
     const customers = await stripe.customers.list({
       email: email,
@@ -38,6 +47,7 @@ serve(async (req) => {
     })
 
     if (customers.data.length === 0) {
+      console.log('No customer found for email:', email)
       return new Response(
         JSON.stringify({ subscribed: false }),
         { 
@@ -47,7 +57,7 @@ serve(async (req) => {
       )
     }
 
-    // Check for any active subscription with either price
+    // Check for any active subscription
     const subscriptions = await stripe.subscriptions.list({
       customer: customers.data[0].id,
       status: 'active',
@@ -55,6 +65,7 @@ serve(async (req) => {
     })
 
     const hasActiveSubscription = subscriptions.data.length > 0
+    console.log('Has active subscription:', hasActiveSubscription)
 
     return new Response(
       JSON.stringify({ subscribed: hasActiveSubscription }),
