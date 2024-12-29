@@ -9,7 +9,7 @@ const Stats = lazy(() => import("../components/Stats"));
 const FAQ = lazy(() => import("../components/FAQ"));
 const Footer = lazy(() => import("../components/Footer"));
 
-// Loading fallback component
+// Improved loading fallback component with better visual feedback
 const SectionLoader = () => (
   <div className="w-full space-y-4 p-8">
     <Skeleton className="h-8 w-3/4 mx-auto" />

@@ -8,6 +8,9 @@
   <meta name="description" content="EduMaCation - Built for teachers to teach their way!" />
   <meta name="author" content="GPT Engineer" />
   <meta property="og:image" content="/og-image.svg" />
+  <!-- Preload critical assets -->
+  <link rel="preload" href="/src/index.css" as="style">
+  <link rel="preload" href="/src/main.tsx" as="script">
 </head>
 
 <body>
@@ -16,6 +19,8 @@
       <p>Loading...</p>
     </div>
   </div>
+  <!-- Required Lovable script -->
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
