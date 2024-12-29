@@ -24,7 +24,7 @@ const Pricing = () => {
             <div className="mb-6">
               <h3 className="text-2xl font-bold mb-2">Monthly Plan</h3>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold">$4.60</span>
+                <span className="text-4xl font-bold">$5</span>
                 <span className="text-secondary">/month</span>
               </div>
             </div>
@@ -48,7 +48,7 @@ const Pricing = () => {
                 <span>Cancel anytime</span>
               </li>
             </ul>
-            <Button className="w-full bg-primary text-white" onClick={() => navigate("/signup")}>
+            <Button className="w-full bg-primary text-white" onClick={() => navigate("/signin")}>
               Start free trial
             </Button>
           </div>
@@ -56,7 +56,7 @@ const Pricing = () => {
           {/* Annual Plan */}
           <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
             <div className="absolute -right-12 top-8 bg-highlight text-primary px-12 py-1 rotate-45">
-              Save 9%
+              Save 17%
             </div>
             <div className="mb-6">
               <h3 className="text-2xl font-bold mb-2">Annual Plan</h3>
@@ -85,7 +85,7 @@ const Pricing = () => {
                 <span>Priority support</span>
               </li>
             </ul>
-            <Button className="w-full bg-primary text-white" onClick={() => navigate("/signup")}>
+            <Button className="w-full bg-primary text-white" onClick={() => navigate("/signin")}>
               Start free trial
             </Button>
           </div>

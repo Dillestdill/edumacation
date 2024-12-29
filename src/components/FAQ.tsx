@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     question: "How much does EduMaCation cost?",
-    answer: "We offer flexible pricing options: $4.60/month for unlimited lesson plans, or $50/year (a 9% savings!) for annual access. Affordable, time-saving, and designed for every teacher.",
+    answer: "We offer flexible pricing options: $5/month for unlimited lesson plans, or $50/year (a 17% savings!) for annual access. Affordable, time-saving, and designed for every teacher.",
     iconBg: "bg-purple-50",
   },
 ];
