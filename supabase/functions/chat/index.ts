@@ -35,9 +35,9 @@ serve(async (req) => {
           }
         ],
         temperature: 0.7,
-        max_tokens: 1500, // Increased from 500 to 1500
-        presence_penalty: 0.1, // Added to encourage more complete responses
-        frequency_penalty: 0.1, // Added to encourage more varied language
+        max_tokens: 1500,
+        presence_penalty: 0.1,
+        frequency_penalty: 0.1,
       })
 
       const response = completion.choices[0].message?.content || "I apologize, but I couldn't generate a response."
@@ -53,7 +53,6 @@ serve(async (req) => {
     } catch (openAIError: any) {
       console.error('OpenAI API Error:', openAIError)
       
-      // Handle rate limiting error specifically
       if (openAIError.status === 429) {
         return new Response(
           JSON.stringify({ 
@@ -67,7 +66,6 @@ serve(async (req) => {
         )
       }
 
-      // Handle other OpenAI errors
       return new Response(
         JSON.stringify({ 
           error: openAIError.message || "An error occurred while processing your request",

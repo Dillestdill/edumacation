@@ -1,93 +1,96 @@
 import { useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import MessageList from "./chat/MessageList";
 import MessageInput from "./chat/MessageInput";
-import SaveDialog from "./chat/SaveDialog";
 
 interface AIChatSectionProps {
   session: Session | null;
-  onSavePlan?: (title: string, prompt: string, response: string, date: Date) => void;
 }
 
-const AIChatSection = ({ session, onSavePlan }: AIChatSectionProps) => {
-  const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
-  const [inputMessage, setInputMessage] = useState("");
+const AIChatSection = ({ session }: AIChatSectionProps) => {
+  const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [saveTitle, setSaveTitle] = useState("");
-  const [selectedMessage, setSelectedMessage] = useState<{ prompt: string; response: string } | null>(null);
+  const [inputMessage, setInputMessage] = useState("");
+  const { toast } = useToast();
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || !session?.user) return;
-
-    setIsLoading(true);
-    const userMessage = inputMessage;
-    setInputMessage("");
-
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    if (!inputMessage.trim() || isLoading) return;
 
     try {
+      setIsLoading(true);
+      
+      // Add user message to chat
+      const userMessage = {
+        role: "user",
+        content: inputMessage,
+        timestamp: new Date().toISOString(),
+      };
+      
+      setMessages((prev) => [...prev, userMessage]);
+      setInputMessage("");
+
+      // Call Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('chat', {
-        body: { message: userMessage }
+        body: { message: inputMessage },
       });
 
-      if (error) {
-        if (error.status === 429) {
-          toast.error("The AI service is currently at capacity. Please try again in a few minutes.");
-          setMessages(prev => prev.slice(0, -1));
-          return;
+      if (error) throw error;
+
+      // Add AI response to chat
+      const aiMessage = {
+        role: "assistant",
+        content: data.response,
+        timestamp: new Date().toISOString(),
+      };
+      
+      setMessages((prev) => [...prev, aiMessage]);
+
+      // Save to chat history if user is authenticated
+      if (session?.user?.id) {
+        const { error: dbError } = await supabase
+          .from('chat_history')
+          .insert([
+            {
+              user_id: session.user.id,
+              prompt: inputMessage,
+              response: data.response,
+            },
+          ]);
+
+        if (dbError) {
+          console.error('Error saving to chat history:', dbError);
+          toast({
+            title: "Error",
+            description: "Failed to save chat history",
+            variant: "destructive",
+          });
         }
-        throw error;
       }
-
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
-
-      await supabase
-        .from('chat_history')
-        .insert([{
-          user_id: session.user.id,
-          prompt: userMessage,
-          response: data.response
-        }]);
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to get response. Please try again later.');
-      setMessages(prev => prev.slice(0, -1));
+    } catch (error: any) {
+      console.error('Chat error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSave = (prompt: string, response: string) => {
-    setSelectedMessage({ prompt, response });
-  };
-
-  const handleSaveConfirm = (date: Date) => {
-    if (selectedMessage && saveTitle && onSavePlan) {
-      onSavePlan(saveTitle, selectedMessage.prompt, selectedMessage.response, date);
-      setSaveTitle("");
-      setSelectedMessage(null);
-    }
-  };
-
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-semibold mb-6">AI Assistant</h2>
-      <MessageList messages={messages} onSave={onSavePlan ? handleSave : undefined} />
-      <MessageInput
-        inputMessage={inputMessage}
-        setInputMessage={setInputMessage}
-        onSend={handleSendMessage}
-        isLoading={isLoading}
-      />
-      <SaveDialog
-        isOpen={!!selectedMessage}
-        onClose={() => setSelectedMessage(null)}
-        title={saveTitle}
-        setTitle={setSaveTitle}
-        onSave={handleSaveConfirm}
-      />
+    <div className="max-w-4xl mx-auto mt-8">
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <MessageList messages={messages} />
+        <MessageInput
+          inputMessage={inputMessage}
+          setInputMessage={setInputMessage}
+          onSend={handleSendMessage}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 };
