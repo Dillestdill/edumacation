@@ -14,7 +14,7 @@ const Pricing = () => {
             Simple, transparent pricing
           </h1>
           <p className="text-secondary text-lg max-w-2xl mx-auto">
-            Start with a 10-day free trial. No credit card required.
+            Choose the plan that works best for you
           </p>
         </div>
 
@@ -49,7 +49,7 @@ const Pricing = () => {
               </li>
             </ul>
             <Button className="w-full bg-primary text-white" onClick={() => navigate("/signin")}>
-              Start free trial
+              Subscribe Monthly
             </Button>
           </div>
 
@@ -86,14 +86,13 @@ const Pricing = () => {
               </li>
             </ul>
             <Button className="w-full bg-primary text-white" onClick={() => navigate("/signin")}>
-              Start free trial
+              Subscribe Yearly
             </Button>
           </div>
         </div>
 
         <div className="text-center mt-16 text-secondary">
-          <p>All plans include a 10-day free trial. No credit card required.</p>
-          <p className="mt-2">Questions? Contact our support team.</p>
+          <p>Questions? Contact our support team.</p>
         </div>
       </div>
     </div>
