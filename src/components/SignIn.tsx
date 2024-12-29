@@ -102,6 +102,7 @@ const SignIn = () => {
               }
             }
           }}
+          providers={[]}
           redirectTo={`${window.location.origin}/home`}
           localization={{
             variables: {
