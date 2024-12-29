@@ -50,7 +50,20 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 6s ease-in-out infinite",
       },
+      textShadow: {
+        '3d': '2px 2px 0 #828179, 4px 4px 0 #A3A299, 6px 6px 0 #C4C3BB',
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.text-shadow-3d': {
+          textShadow: '2px 2px 0 #828179, 4px 4px 0 #A3A299, 6px 6px 0 #C4C3BB',
+        },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 } satisfies Config;

@@ -20,7 +20,7 @@ const Hero = () => {
       <div className="absolute top-1/3 right-1/3 w-3 h-3 rounded-full bg-white border-2 border-gray-200"></div>
       
       <div className="relative z-10 max-w-[1200px] mx-auto px-6 text-center">
-        <h1 className="text-[80px] leading-[1] font-medium tracking-[-0.02em] text-[#141413] mb-8">
+        <h1 className="text-[80px] leading-[1] font-medium tracking-[-0.02em] text-[#141413] mb-8 text-shadow-3d">
           Enjoy your time<br />off the clock!!
         </h1>
         
