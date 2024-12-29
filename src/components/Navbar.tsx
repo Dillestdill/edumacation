@@ -26,7 +26,6 @@ const Navbar = () => {
 
   const handleFAQClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // First navigate to home page, then scroll to FAQ section
     navigate("/");
     setTimeout(() => {
       const faqSection = document.getElementById("faq");
@@ -40,9 +39,11 @@ const Navbar = () => {
     <nav className="fixed w-full z-50 px-6 py-4 bg-white shadow-sm">
       <div className="max-w-[1200px] mx-auto flex justify-between items-center">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <img 
+            src="/lovable-uploads/a3717d44-b0f1-4e33-9bf3-c67453939fa8.png" 
+            alt="Teacher writing at desk" 
+            className="h-10 w-auto"
+          />
           <span className="font-medium text-[#141413]">EduMaCation</span>
         </div>
         
