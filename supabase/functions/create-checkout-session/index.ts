@@ -19,11 +19,23 @@ serve(async (req) => {
   )
 
   try {
+    console.log('Starting checkout session creation...')
+    
     // Get the session or user object
     const authHeader = req.headers.get('Authorization')!
+    if (!authHeader) {
+      throw new Error('No authorization header')
+    }
+    
     const token = authHeader.replace('Bearer ', '')
-    const { data } = await supabaseClient.auth.getUser(token)
-    const user = data.user
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token)
+    
+    if (userError) {
+      console.error('Error getting user:', userError)
+      throw userError
+    }
+
+    const user = userData.user
     const email = user?.email
 
     if (!email) {
@@ -43,8 +55,19 @@ serve(async (req) => {
     })
 
     // Get request body
-    const { planType } = await req.json()
-    console.log('Plan type selected:', planType)
+    let planType;
+    try {
+      const body = await req.json()
+      planType = body.planType
+      console.log('Plan type received:', planType)
+    } catch (error) {
+      console.error('Error parsing request body:', error)
+      throw new Error('Invalid request body')
+    }
+
+    if (!planType) {
+      throw new Error('Plan type is required')
+    }
     
     // Set price ID based on plan type
     const price_id = planType === 'yearly' 
