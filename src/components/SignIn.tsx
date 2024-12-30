@@ -3,15 +3,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { useToast } from "./ui/use-toast";
 import { Label } from "./ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { useToast } from "./ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -55,12 +49,12 @@ const SignIn = () => {
     setIsLoading(true);
 
     try {
-      const { error } = isSignUp
+      const { data, error } = isSignUp
         ? await supabase.auth.signUp({
             email,
             password,
             options: {
-              emailRedirectTo: `${window.location.origin}/signin`,
+              emailRedirectTo: window.location.origin + "/signin",
             },
           })
         : await supabase.auth.signInWithPassword({
@@ -73,15 +67,17 @@ const SignIn = () => {
       if (isSignUp) {
         toast({
           title: "Check your email",
-          description: "We've sent you a confirmation link to complete your registration",
+          description: "We sent you a confirmation link to complete your registration.",
         });
       } else {
-        navigate("/home");
+        if (data?.user) {
+          navigate("/home");
+        }
       }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "An error occurred during authentication",
         variant: "destructive",
       });
     } finally {
@@ -90,82 +86,60 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-      <Button
-        variant="ghost"
-        className="absolute top-4 left-4 text-black hover:text-gray-700"
-        onClick={() => navigate("/")}
-      >
-        ← Back to Main Page
-      </Button>
+    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-sm">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">{isSignUp ? "Create an account" : "Welcome back"}</h2>
+          <p className="text-secondary mt-2">
+            {isSignUp ? "Get started with your account" : "Sign in to your account"}
+          </p>
+        </div>
 
-      <Card className="w-full max-w-md bg-white border-2 border-black">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-black">
-            {isSignUp ? "Create Account" : "Welcome Back"}
-          </CardTitle>
-          <CardDescription className="text-gray-600">
-            {isSignUp
-              ? "Enter your email to create an account"
-              : "Please enter your details to sign in"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-black">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="border-2 border-black focus:ring-black"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-black">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="border-2 border-black focus:ring-black"
-                required
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-black text-white hover:bg-gray-800"
-              disabled={isLoading}
-            >
-              {isLoading
-                ? "Loading..."
-                : isSignUp
-                ? "Create Account"
-                : "Sign In"}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-gray-600 hover:text-black underline"
-            >
-              {isSignUp
-                ? "Already have an account? Sign in"
-                : "Don't have an account? Sign up"}
-            </button>
+        <form onSubmit={handleAuth} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isSignUp ? "Creating account..." : "Signing in..."}
+              </>
+            ) : (
+              <>{isSignUp ? "Create account" : "Sign in"}</>
+            )}
+          </Button>
+        </form>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-primary hover:underline"
+          >
+            {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
