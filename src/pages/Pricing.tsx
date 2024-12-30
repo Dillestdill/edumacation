@@ -46,7 +46,7 @@ const Pricing = () => {
             Simple, transparent pricing
           </h1>
           <p className="text-secondary text-lg max-w-2xl mx-auto">
-            Choose the plan that works best for you
+            Start with a 5-day free trial, then choose the plan that works best for you
           </p>
         </div>
 
@@ -59,6 +59,7 @@ const Pricing = () => {
                 <span className="text-4xl font-bold">$5</span>
                 <span className="text-secondary">/month</span>
               </div>
+              <p className="text-sm text-green-600 mt-2">Includes 5-day free trial</p>
             </div>
             <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-2">
@@ -84,7 +85,7 @@ const Pricing = () => {
               className="w-full bg-primary text-white" 
               onClick={() => handleSubscribe('monthly')}
             >
-              Subscribe Monthly
+              Start Free Trial
             </Button>
           </div>
 
@@ -99,6 +100,7 @@ const Pricing = () => {
                 <span className="text-4xl font-bold">$50</span>
                 <span className="text-secondary">/year</span>
               </div>
+              <p className="text-sm text-green-600 mt-2">Includes 5-day free trial</p>
             </div>
             <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-2">
@@ -124,7 +126,7 @@ const Pricing = () => {
               className="w-full bg-primary text-white" 
               onClick={() => handleSubscribe('yearly')}
             >
-              Subscribe Yearly
+              Start Free Trial
             </Button>
           </div>
         </div>
