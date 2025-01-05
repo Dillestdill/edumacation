@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Skeleton } from "./ui/skeleton";
 import { useToast } from "./ui/use-toast";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SubscriptionGuardProps {
@@ -12,6 +12,7 @@ interface SubscriptionGuardProps {
 const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
   const { data: subscription, isLoading, error } = useSubscription();
   const { toast } = useToast();
+  const hasShownTrialToast = useRef(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -22,7 +23,6 @@ const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
           description: "Please sign in to access the tools.",
           variant: "destructive",
         });
-        return;
       }
     };
 
@@ -30,15 +30,26 @@ const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
   }, [toast]);
 
   useEffect(() => {
-    if (subscription?.isInTrial) {
+    if (subscription?.isInTrial && !hasShownTrialToast.current) {
       const trialEnd = new Date(subscription.trialEndsAt * 1000);
       toast({
         title: "Trial Period Active",
         description: `Your free trial ends on ${trialEnd.toLocaleDateString()}. Please subscribe to maintain access.`,
         duration: 5000,
       });
+      hasShownTrialToast.current = true;
     }
   }, [subscription, toast]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to verify subscription status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   if (isLoading) {
     return (
@@ -54,22 +65,8 @@ const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
     );
   }
 
-  if (error) {
-    toast({
-      title: "Error",
-      description: "Failed to verify subscription status. Please try again.",
-      variant: "destructive",
-    });
-    return <Navigate to="/pricing" replace />;
-  }
-
   // Check if user has access (either subscribed or in trial)
   if (!subscription?.subscribed && !subscription?.isInTrial) {
-    toast({
-      title: "Access Restricted",
-      description: "Please subscribe or start a trial to access these tools.",
-      variant: "destructive",
-    });
     return <Navigate to="/pricing" replace />;
   }
 
