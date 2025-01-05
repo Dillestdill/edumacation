@@ -2,9 +2,11 @@ import Navbar from "../components/Navbar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Pricing = () => {
   const { toast } = useToast();
+  const { data: subscription } = useSubscription();
 
   const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
     try {
@@ -40,6 +42,25 @@ const Pricing = () => {
     <div className="min-h-screen bg-surface">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-24">
+        {subscription?.subscribed && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8 text-center">
+            <h2 className="text-lg font-semibold text-green-800 mb-2">
+              You have an active subscription!
+            </h2>
+            <p className="text-green-700 mb-4">
+              Manage your subscription or cancel anytime through your Stripe account.
+            </p>
+            <a
+              href="https://billing.stripe.com/p/login/test_28o5kQ8Qd2Xf3GE288"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-white text-green-700 px-4 py-2 rounded-md border border-green-300 hover:bg-green-50 transition-colors"
+            >
+              Manage Subscription
+            </a>
+          </div>
+        )}
+
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             Simple, transparent pricing
