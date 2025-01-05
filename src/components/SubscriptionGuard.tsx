@@ -1,6 +1,8 @@
 import { Navigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Skeleton } from "./ui/skeleton";
+import { useToast } from "./ui/use-toast";
+import { useEffect } from "react";
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
@@ -8,6 +10,18 @@ interface SubscriptionGuardProps {
 
 const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
   const { data: subscription, isLoading } = useSubscription();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (subscription?.isInTrial) {
+      const trialEnd = new Date(subscription.trialEndsAt * 1000);
+      toast({
+        title: "Trial Period Active",
+        description: `Your free trial ends on ${trialEnd.toLocaleDateString()}. Please subscribe to maintain access.`,
+        duration: 5000,
+      });
+    }
+  }, [subscription, toast]);
 
   if (isLoading) {
     return (
@@ -23,7 +37,7 @@ const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
     );
   }
 
-  if (!subscription?.subscribed) {
+  if (!subscription?.subscribed && !subscription?.isInTrial) {
     return <Navigate to="/pricing" replace />;
   }
 

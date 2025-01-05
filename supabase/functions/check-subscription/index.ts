@@ -57,7 +57,7 @@ serve(async (req) => {
       )
     }
 
-    // Check for any active subscription
+    // Check for any active subscription or trial
     const subscriptions = await stripe.subscriptions.list({
       customer: customers.data[0].id,
       status: 'active',
@@ -65,10 +65,24 @@ serve(async (req) => {
     })
 
     const hasActiveSubscription = subscriptions.data.length > 0
+    let isInTrial = false
+    let trialEndsAt = null
+
+    if (hasActiveSubscription) {
+      const subscription = subscriptions.data[0]
+      isInTrial = subscription.status === 'active' && subscription.trial_end !== null && subscription.trial_end > Math.floor(Date.now() / 1000)
+      trialEndsAt = subscription.trial_end
+    }
+
     console.log('Has active subscription:', hasActiveSubscription)
+    console.log('Is in trial:', isInTrial)
 
     return new Response(
-      JSON.stringify({ subscribed: hasActiveSubscription }),
+      JSON.stringify({ 
+        subscribed: hasActiveSubscription,
+        isInTrial,
+        trialEndsAt
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
