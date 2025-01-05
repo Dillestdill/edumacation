@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
+import { Mail } from "lucide-react";
 
 const Pricing = () => {
   const { toast } = useToast();
@@ -152,7 +153,14 @@ const Pricing = () => {
         </div>
 
         <div className="text-center mt-16 text-secondary">
-          <p>Questions? Contact our support team.</p>
+          <p className="mb-4">Questions? Contact our support team.</p>
+          <a 
+            href="mailto:LYEserviceshelp@gmail.com"
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+          >
+            <Mail className="h-4 w-4" />
+            LYEserviceshelp@gmail.com
+          </a>
         </div>
       </div>
     </div>
