@@ -12,27 +12,36 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-  )
-
   try {
     // Get the user's JWT token from the request headers
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    const { data } = await supabaseClient.auth.getUser(token)
-    const user = data.user
-    const email = user?.email
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('No authorization header')
+    }
 
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    )
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
+    
+    if (userError || !user) {
+      console.error('Auth error:', userError)
+      throw new Error('Authentication failed')
+    }
+
+    const email = user.email
     if (!email) {
+      console.error('No email found for user:', user.id)
       throw new Error('No email found')
     }
 
-    // Initialize Stripe with the secret key from environment variables
+    // Initialize Stripe
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
     if (!stripeSecretKey) {
-      throw new Error('Stripe secret key not found in environment variables')
+      throw new Error('Stripe secret key not found')
     }
 
     const stripe = new Stripe(stripeSecretKey, {
@@ -41,6 +50,7 @@ serve(async (req) => {
 
     console.log('Checking subscription for email:', email)
 
+    // Get customer
     const customers = await stripe.customers.list({
       email: email,
       limit: 1
@@ -49,7 +59,11 @@ serve(async (req) => {
     if (customers.data.length === 0) {
       console.log('No customer found for email:', email)
       return new Response(
-        JSON.stringify({ subscribed: false }),
+        JSON.stringify({ 
+          subscribed: false,
+          isInTrial: false,
+          trialEndsAt: null
+        }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
@@ -57,7 +71,7 @@ serve(async (req) => {
       )
     }
 
-    // Check for any active subscription or trial
+    // Check for active subscription or trial
     const subscriptions = await stripe.subscriptions.list({
       customer: customers.data[0].id,
       status: 'active',
@@ -70,12 +84,17 @@ serve(async (req) => {
 
     if (hasActiveSubscription) {
       const subscription = subscriptions.data[0]
-      isInTrial = subscription.status === 'active' && subscription.trial_end !== null && subscription.trial_end > Math.floor(Date.now() / 1000)
+      isInTrial = subscription.status === 'active' && 
+                  subscription.trial_end !== null && 
+                  subscription.trial_end > Math.floor(Date.now() / 1000)
       trialEndsAt = subscription.trial_end
     }
 
-    console.log('Has active subscription:', hasActiveSubscription)
-    console.log('Is in trial:', isInTrial)
+    console.log('Subscription status:', {
+      hasActiveSubscription,
+      isInTrial,
+      trialEndsAt
+    })
 
     return new Response(
       JSON.stringify({ 
@@ -89,12 +108,17 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error checking subscription:', error)
+    console.error('Error in check-subscription:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        subscribed: false,
+        isInTrial: false,
+        trialEndsAt: null
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: 200, // Changed to 200 to handle errors gracefully on client
       }
     )
   }
