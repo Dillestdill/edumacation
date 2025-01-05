@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Tool } from "lucide-react";
 
 interface AuthenticatedNavProps {
   handleSignOut: () => Promise<void>;
@@ -9,6 +10,15 @@ const AuthenticatedNav = ({ handleSignOut }: AuthenticatedNavProps) => {
   
   return (
     <div className="flex items-center gap-8">
+      <Link 
+        to="/tools" 
+        className={`flex items-center gap-2 text-[#141413] hover:text-[#141413]/80 transition-colors ${
+          pathname === '/tools' ? 'font-semibold' : ''
+        }`}
+      >
+        <Tool className="h-4 w-4" />
+        Tools
+      </Link>
       <Link 
         to="/home" 
         className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
