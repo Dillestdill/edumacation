@@ -19,14 +19,13 @@ const Pricing = () => {
         return;
       }
 
-      const response = await supabase.functions.invoke('create-checkout-session', {
-        body: { planType },
-      });
+      // Redirect to the appropriate Stripe payment link
+      const paymentLinks = {
+        monthly: 'https://buy.stripe.com/14k9CJ28l5yF82QaEE',
+        yearly: 'https://buy.stripe.com/8wMeX3fZb2mt96UeUV'
+      };
 
-      if (response.error) throw response.error;
-      if (!response.data.url) throw new Error('No checkout URL returned');
-
-      window.location.href = response.data.url;
+      window.location.href = paymentLinks[planType];
     } catch (error) {
       console.error('Error:', error);
       toast({
