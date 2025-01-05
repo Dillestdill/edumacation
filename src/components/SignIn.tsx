@@ -15,6 +15,7 @@ const SignIn = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [verificationSent, setVerificationSent] = useState(false);
 
   useEffect(() => {
     // Check for email confirmation
@@ -65,6 +66,7 @@ const SignIn = () => {
       if (error) throw error;
 
       if (isSignUp) {
+        setVerificationSent(true);
         toast({
           title: "Check your email",
           description: "We sent you a confirmation link to complete your registration.",
@@ -84,6 +86,31 @@ const SignIn = () => {
       setIsLoading(false);
     }
   };
+
+  if (verificationSent) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-sm text-center">
+          <h2 className="text-2xl font-bold">Check your email</h2>
+          <p className="text-secondary">
+            We've sent you a verification link. Please check your email to complete your registration.
+          </p>
+          <p className="text-secondary text-sm">
+            Once verified, you'll be automatically redirected back to the site.
+          </p>
+          <Button
+            onClick={() => {
+              setVerificationSent(false);
+              setIsSignUp(false);
+            }}
+            className="mt-4"
+          >
+            Return to sign in
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
