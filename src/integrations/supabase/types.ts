@@ -296,6 +296,12 @@ export type Database = {
         }
         Returns: number
       }
+      has_tool_access: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
       increment_prompt_use_count: {
         Args: {
           prompt_id: string

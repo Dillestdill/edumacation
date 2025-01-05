@@ -73,6 +73,11 @@ const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
     return <Navigate to="/pricing" replace />;
   }
 
+  // If this is the first time accessing with a trial/subscription, redirect to tools dashboard
+  if (window.location.pathname === "/pricing" && (subscription?.subscribed || subscription?.isInTrial)) {
+    return <Navigate to="/tools" replace />;
+  }
+
   return <>{children}</>;
 };
 

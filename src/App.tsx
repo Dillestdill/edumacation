@@ -17,6 +17,7 @@ const SignIn = lazy(() => import("./components/SignIn"));
 const UserHome = lazy(() => import("./pages/UserHome"));
 const LessonPlanning = lazy(() => import("./pages/LessonPlanning"));
 const EducatorChat = lazy(() => import("./pages/EducatorChat"));
+const ToolsDashboard = lazy(() => import("./pages/ToolsDashboard"));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-white p-8">
@@ -79,6 +80,16 @@ const App = () => (
             <Route path="/teacher-reviews" element={<TeacherReviews />} />
             <Route path="/challenge" element={<Challenge />} />
             <Route path="/signin" element={<SignIn />} />
+            <Route
+              path="/tools"
+              element={
+                <ProtectedRoute>
+                  <SubscriptionGuard>
+                    <ToolsDashboard />
+                  </SubscriptionGuard>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/home"
               element={
