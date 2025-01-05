@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Tool } from "lucide-react";
+import { Wrench } from "lucide-react";
 
 interface AuthenticatedNavProps {
   handleSignOut: () => Promise<void>;
@@ -16,7 +16,7 @@ const AuthenticatedNav = ({ handleSignOut }: AuthenticatedNavProps) => {
           pathname === '/tools' ? 'font-semibold' : ''
         }`}
       >
-        <Tool className="h-4 w-4" />
+        <Wrench className="h-4 w-4" />
         Tools
       </Link>
       <Link 
