@@ -3,14 +3,31 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { Skeleton } from "./ui/skeleton";
 import { useToast } from "./ui/use-toast";
 import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
 }
 
 const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
-  const { data: subscription, isLoading } = useSubscription();
+  const { data: subscription, isLoading, error } = useSubscription();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Session Expired",
+          description: "Please sign in to access the tools.",
+          variant: "destructive",
+        });
+        return;
+      }
+    };
+
+    checkSession();
+  }, [toast]);
 
   useEffect(() => {
     if (subscription?.isInTrial) {
@@ -37,7 +54,22 @@ const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
     );
   }
 
+  if (error) {
+    toast({
+      title: "Error",
+      description: "Failed to verify subscription status. Please try again.",
+      variant: "destructive",
+    });
+    return <Navigate to="/pricing" replace />;
+  }
+
+  // Check if user has access (either subscribed or in trial)
   if (!subscription?.subscribed && !subscription?.isInTrial) {
+    toast({
+      title: "Access Restricted",
+      description: "Please subscribe or start a trial to access these tools.",
+      variant: "destructive",
+    });
     return <Navigate to="/pricing" replace />;
   }
 

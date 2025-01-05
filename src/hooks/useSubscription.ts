@@ -17,11 +17,7 @@ export const useSubscription = () => {
       const { data: session } = await supabase.auth.getSession();
       
       if (!session?.session) {
-        return {
-          subscribed: false,
-          isInTrial: false,
-          trialEndsAt: null
-        };
+        throw new Error("No active session");
       }
 
       const { data, error } = await supabase.functions.invoke<SubscriptionData>("check-subscription");
@@ -38,5 +34,7 @@ export const useSubscription = () => {
       
       return data;
     },
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
