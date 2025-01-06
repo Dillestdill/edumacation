@@ -11,7 +11,7 @@ const AuthenticatedNav = ({ handleSignOut }: AuthenticatedNavProps) => {
   const handleNavClick = (path: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      navigate(path, { replace: true });
+      navigate(path);
     } catch (error) {
       console.error(`Navigation error to ${path}:`, error);
     }

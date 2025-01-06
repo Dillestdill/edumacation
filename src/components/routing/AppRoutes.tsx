@@ -29,9 +29,9 @@ const AppRoutes = () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (mounted) {
           setSession(!!session);
-          if (session) {
+          if (session && location.pathname === '/') {
             const storedPath = localStorage.getItem('lastPath');
-            if (storedPath && location.pathname === '/') {
+            if (storedPath) {
               setInitialPath(storedPath);
             }
           }
@@ -46,8 +46,19 @@ const AppRoutes = () => {
 
     checkSessionAndPath();
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        setSession(!!session);
+        if (!session && !['/', '/signin', '/pricing', '/teacher-reviews', '/challenge'].includes(location.pathname)) {
+          localStorage.setItem('lastPath', location.pathname);
+          navigate('/signin');
+        }
+      }
+    });
+
     return () => {
       mounted = false;
+      subscription.unsubscribe();
     };
   }, [location.pathname]);
 
