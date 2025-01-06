@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 
-const SignIn = () => {
+export const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
