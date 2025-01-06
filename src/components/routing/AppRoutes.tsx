@@ -10,7 +10,7 @@ const Index = lazy(() => import("@/pages/Index"));
 const Pricing = lazy(() => import("@/pages/Pricing"));
 const TeacherReviews = lazy(() => import("@/pages/TeacherReviews"));
 const Challenge = lazy(() => import("@/pages/Challenge"));
-const SignIn = lazy(() => import("@/components/SignIn"));
+const SignIn = lazy(() => import("@/pages/SignIn"));
 const UserHome = lazy(() => import("@/pages/UserHome"));
 const LessonPlanning = lazy(() => import("@/pages/LessonPlanning"));
 const EducatorChat = lazy(() => import("@/pages/EducatorChat"));
@@ -30,10 +30,10 @@ const AppRoutes = () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (mounted) {
           setSession(!!session);
-          if (session && location.pathname === '/') {
-            const storedPath = localStorage.getItem('lastPath');
-            if (storedPath) {
-              setInitialPath(storedPath);
+          if (session) {
+            // If user is authenticated and on the root path, redirect to /home
+            if (location.pathname === '/') {
+              navigate('/home', { replace: true });
             }
           }
         }
@@ -51,8 +51,10 @@ const AppRoutes = () => {
       if (mounted) {
         setSession(!!session);
         if (!session && !['/', '/signin', '/pricing', '/teacher-reviews', '/challenge'].includes(location.pathname)) {
-          localStorage.setItem('lastPath', location.pathname);
           navigate('/signin');
+        } else if (session && location.pathname === '/') {
+          // Redirect to home when authenticated user lands on root path
+          navigate('/home', { replace: true });
         }
       }
     });
@@ -71,8 +73,9 @@ const AppRoutes = () => {
     return <Navigate to="/signin" replace />;
   }
 
-  if (initialPath && session) {
-    return <Navigate to={initialPath} replace />;
+  // If authenticated user is on root path, redirect to home
+  if (session && location.pathname === '/') {
+    return <Navigate to="/home" replace />;
   }
 
   return (
