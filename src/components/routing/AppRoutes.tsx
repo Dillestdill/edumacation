@@ -1,0 +1,110 @@
+import { lazy } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import ProtectedRoute from "./ProtectedRoute";
+import SubscriptionGuard from "@/components/SubscriptionGuard";
+
+// Lazy load route components
+const Index = lazy(() => import("@/pages/Index"));
+const Pricing = lazy(() => import("@/pages/Pricing"));
+const TeacherReviews = lazy(() => import("@/pages/TeacherReviews"));
+const Challenge = lazy(() => import("@/pages/Challenge"));
+const SignIn = lazy(() => import("@/components/SignIn"));
+const UserHome = lazy(() => import("@/pages/UserHome"));
+const LessonPlanning = lazy(() => import("@/pages/LessonPlanning"));
+const EducatorChat = lazy(() => import("@/pages/EducatorChat"));
+const ToolsDashboard = lazy(() => import("@/pages/ToolsDashboard"));
+
+const AppRoutes = () => {
+  const [initialPath, setInitialPath] = useState<string | null>(null);
+  const location = useLocation();
+  const [session, setSession] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const checkSessionAndPath = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          setSession(!!session);
+          if (session) {
+            const storedPath = localStorage.getItem('lastPath');
+            if (storedPath && location.pathname === '/') {
+              setInitialPath(storedPath);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        if (mounted) {
+          setSession(false);
+        }
+      }
+    };
+
+    checkSessionAndPath();
+
+    return () => {
+      mounted = false;
+    };
+  }, [location.pathname]);
+
+  if (initialPath && session) {
+    return <Navigate to={initialPath} replace />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/teacher-reviews" element={<TeacherReviews />} />
+      <Route path="/challenge" element={<Challenge />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route
+        path="/tools"
+        element={
+          <ProtectedRoute>
+            <SubscriptionGuard>
+              <ToolsDashboard />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <SubscriptionGuard>
+              <UserHome />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lesson-planning"
+        element={
+          <ProtectedRoute>
+            <SubscriptionGuard>
+              <LessonPlanning />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/educator-chat"
+        element={
+          <ProtectedRoute>
+            <SubscriptionGuard>
+              <EducatorChat />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
+
+export default AppRoutes;
