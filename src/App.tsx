@@ -46,26 +46,40 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(!!session);
+    let mounted = true;
 
-      // If session exists, store the current path
-      if (session) {
-        localStorage.setItem('lastPath', location.pathname);
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          setSession(!!session);
+          if (session) {
+            localStorage.setItem('lastPath', location.pathname);
+          }
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        if (mounted) {
+          setSession(false);
+        }
       }
     };
 
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(!!session);
-      if (session) {
-        localStorage.setItem('lastPath', location.pathname);
+      if (mounted) {
+        setSession(!!session);
+        if (session) {
+          localStorage.setItem('lastPath', location.pathname);
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [location]);
 
   if (session === null) {
@@ -86,22 +100,35 @@ const AppRoutes = () => {
   const [session, setSession] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkSessionAndPath = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(!!session);
+    let mounted = true;
 
-      if (session) {
-        const storedPath = localStorage.getItem('lastPath');
-        if (storedPath && location.pathname === '/') {
-          setInitialPath(storedPath);
+    const checkSessionAndPath = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          setSession(!!session);
+          if (session) {
+            const storedPath = localStorage.getItem('lastPath');
+            if (storedPath && location.pathname === '/') {
+              setInitialPath(storedPath);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        if (mounted) {
+          setSession(false);
         }
       }
     };
 
     checkSessionAndPath();
+
+    return () => {
+      mounted = false;
+    };
   }, [location.pathname]);
 
-  // If we have an initial path and the user is authenticated, redirect to it
   if (initialPath && session) {
     return <Navigate to={initialPath} replace />;
   }
@@ -153,6 +180,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

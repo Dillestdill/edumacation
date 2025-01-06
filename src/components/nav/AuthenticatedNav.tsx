@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Wrench } from "lucide-react";
 
 interface AuthenticatedNavProps {
@@ -10,7 +10,11 @@ const AuthenticatedNav = ({ handleSignOut }: AuthenticatedNavProps) => {
   
   const handleNavClick = (path: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(path, { replace: true });
+    try {
+      navigate(path, { replace: true });
+    } catch (error) {
+      console.error(`Navigation error to ${path}:`, error);
+    }
   };
   
   return (

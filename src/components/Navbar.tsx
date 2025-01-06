@@ -12,18 +12,34 @@ const Navbar = () => {
   const [session, setSession] = useState<Session | null>(null);
   
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    let mounted = true;
+
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          setSession(session);
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+      }
+    };
+
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session && location.pathname !== '/signin') {
-        navigate('/signin');
+      if (mounted) {
+        setSession(session);
+        if (!session && location.pathname !== '/signin') {
+          navigate('/signin', { replace: true });
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate, location.pathname]);
 
   const handleSignOut = async () => {
