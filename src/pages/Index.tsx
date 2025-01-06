@@ -1,15 +1,14 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Lazy load components that are below the fold
 const Features = lazy(() => import("../components/Features"));
 const Stats = lazy(() => import("../components/Stats"));
 const FAQ = lazy(() => import("../components/FAQ"));
 const Footer = lazy(() => import("../components/Footer"));
 
-// Improved loading fallback component with better visual feedback
 const SectionLoader = () => (
   <div className="w-full space-y-4 p-8">
     <Skeleton className="h-8 w-3/4 mx-auto" />
@@ -19,6 +18,19 @@ const SectionLoader = () => (
 );
 
 const Index = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.scrollToFAQ) {
+      const faqSection = document.getElementById("faq");
+      if (faqSection) {
+        setTimeout(() => {
+          faqSection.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [location.state]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <Navbar />

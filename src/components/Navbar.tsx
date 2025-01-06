@@ -30,8 +30,8 @@ const Navbar = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) {
         setSession(session);
-        if (!session && location.pathname !== '/signin') {
-          navigate('/signin', { replace: true });
+        if (!session && !location.pathname.startsWith('/signin')) {
+          navigate('/signin');
         }
       }
     });
@@ -53,13 +53,14 @@ const Navbar = () => {
 
   const handleFAQClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate("/");
-    setTimeout(() => {
+    if (location.pathname !== '/') {
+      navigate('/', { state: { scrollToFAQ: true } });
+    } else {
       const faqSection = document.getElementById("faq");
       if (faqSection) {
         faqSection.scrollIntoView({ behavior: "smooth" });
       }
-    }, 100);
+    }
   };
   
   return (
