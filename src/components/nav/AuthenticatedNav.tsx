@@ -24,7 +24,7 @@ const AuthenticatedNav = ({ handleSignOut }: AuthenticatedNavProps) => {
         className="flex items-center gap-2 text-[#141413] hover:text-[#141413]/80 transition-colors"
       >
         <Wrench className="h-4 w-4" />
-        Tools
+        Dashboard
       </button>
       <button 
         onClick={handleNavClick('/home')}

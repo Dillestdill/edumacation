@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingFallback } from "./LoadingFallback";
+import { toast } from "sonner";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         console.error('Session check error:', error);
         if (mounted) {
           setSession(false);
+          toast.error("Authentication error. Please try signing in again.");
         }
       }
     };

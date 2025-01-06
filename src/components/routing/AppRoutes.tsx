@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProtectedRoute from "./ProtectedRoute";
@@ -19,6 +19,7 @@ const ToolsDashboard = lazy(() => import("@/pages/ToolsDashboard"));
 const AppRoutes = () => {
   const [initialPath, setInitialPath] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const [session, setSession] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -60,7 +61,15 @@ const AppRoutes = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [location.pathname]);
+  }, [location.pathname, navigate]);
+
+  // Public routes that don't require authentication
+  const publicRoutes = ['/pricing', '/teacher-reviews', '/challenge', '/signin'];
+
+  // If we're on a protected route and there's no session, redirect to signin
+  if (session === false && !publicRoutes.includes(location.pathname) && location.pathname !== '/') {
+    return <Navigate to="/signin" replace />;
+  }
 
   if (initialPath && session) {
     return <Navigate to={initialPath} replace />;
@@ -68,11 +77,14 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<Index />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/teacher-reviews" element={<TeacherReviews />} />
       <Route path="/challenge" element={<Challenge />} />
       <Route path="/signin" element={<SignIn />} />
+
+      {/* Protected routes - only accessible when authenticated */}
       <Route
         path="/tools"
         element={
