@@ -35,6 +35,8 @@ export const SignIn = () => {
                 },
               },
             }}
+            providers={[]}
+            view="sign_in"
             redirectTo={`${window.location.origin}/tools`}
           />
         </div>
