@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Wrench } from "lucide-react";
 
 interface AuthenticatedNavProps {
@@ -6,44 +6,40 @@ interface AuthenticatedNavProps {
 }
 
 const AuthenticatedNav = ({ handleSignOut }: AuthenticatedNavProps) => {
-  const location = useLocation();
-  const pathname = location.pathname;
+  const navigate = useNavigate();
+  
+  const handleNavClick = (path: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(path, { replace: true });
+  };
   
   return (
     <div className="flex items-center gap-8">
-      <Link 
-        to="/tools" 
-        className={`flex items-center gap-2 text-[#141413] hover:text-[#141413]/80 transition-colors ${
-          pathname === '/tools' ? 'font-semibold' : ''
-        }`}
+      <button 
+        onClick={handleNavClick('/tools')}
+        className="flex items-center gap-2 text-[#141413] hover:text-[#141413]/80 transition-colors"
       >
         <Wrench className="h-4 w-4" />
         Tools
-      </Link>
-      <Link 
-        to="/home" 
-        className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
-          pathname === '/home' ? 'font-semibold' : ''
-        }`}
+      </button>
+      <button 
+        onClick={handleNavClick('/home')}
+        className="text-[#141413] hover:text-[#141413]/80 transition-colors"
       >
         AI Assistant
-      </Link>
-      <Link 
-        to="/educator-chat" 
-        className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
-          pathname === '/educator-chat' ? 'font-semibold' : ''
-        }`}
+      </button>
+      <button 
+        onClick={handleNavClick('/educator-chat')}
+        className="text-[#141413] hover:text-[#141413]/80 transition-colors"
       >
         Educator Chat
-      </Link>
-      <Link 
-        to="/lesson-planning" 
-        className={`text-[#141413] hover:text-[#141413]/80 transition-colors ${
-          pathname === '/lesson-planning' ? 'font-semibold' : ''
-        }`}
+      </button>
+      <button 
+        onClick={handleNavClick('/lesson-planning')}
+        className="text-[#141413] hover:text-[#141413]/80 transition-colors"
       >
         Lesson Planning
-      </Link>
+      </button>
       <button 
         onClick={handleSignOut}
         className="text-[#141413] font-medium hover:text-[#141413]/80 transition-colors"

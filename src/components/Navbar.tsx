@@ -18,14 +18,21 @@ const Navbar = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (!session && location.pathname !== '/signin') {
+        navigate('/signin');
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate, location.pathname]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/signin");
+    try {
+      await supabase.auth.signOut();
+      navigate("/signin", { replace: true });
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const handleFAQClick = (e: React.MouseEvent) => {
