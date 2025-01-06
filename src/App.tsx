@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Suspense, lazy, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,11 +43,20 @@ const queryClient = new QueryClient({
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<boolean | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Store the current path in localStorage when it changes
+    localStorage.setItem('lastPath', location.pathname);
+  }, [location]);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(!!session);
-    });
+    };
+
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(!!session);
@@ -61,10 +70,79 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!session) {
-    return <Navigate to="/signin" replace />;
+    // Store the attempted path before redirecting
+    localStorage.setItem('redirectPath', location.pathname);
+    return <Navigate to="/signin" replace state={{ from: location }} />;
   }
 
   return <>{children}</>;
+};
+
+const AppRoutes = () => {
+  const [initialPath, setInitialPath] = useState<string | null>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    // On initial load, check if there's a stored path
+    const storedPath = localStorage.getItem('lastPath');
+    if (storedPath && location.pathname === '/') {
+      setInitialPath(storedPath);
+    }
+  }, [location.pathname]);
+
+  if (initialPath) {
+    return <Navigate to={initialPath} replace />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/teacher-reviews" element={<TeacherReviews />} />
+      <Route path="/challenge" element={<Challenge />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route
+        path="/tools"
+        element={
+          <ProtectedRoute>
+            <SubscriptionGuard>
+              <ToolsDashboard />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <SubscriptionGuard>
+              <UserHome />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lesson-planning"
+        element={
+          <ProtectedRoute>
+            <SubscriptionGuard>
+              <LessonPlanning />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/educator-chat"
+        element={
+          <ProtectedRoute>
+            <SubscriptionGuard>
+              <EducatorChat />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
 };
 
 const App = () => (
@@ -74,53 +152,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/teacher-reviews" element={<TeacherReviews />} />
-            <Route path="/challenge" element={<Challenge />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route
-              path="/tools"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionGuard>
-                    <ToolsDashboard />
-                  </SubscriptionGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionGuard>
-                    <UserHome />
-                  </SubscriptionGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/lesson-planning"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionGuard>
-                    <LessonPlanning />
-                  </SubscriptionGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/educator-chat"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionGuard>
-                    <EducatorChat />
-                  </SubscriptionGuard>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+          <AppRoutes />
         </Suspense>
       </BrowserRouter>
     </TooltipProvider>
