@@ -1,7 +1,5 @@
 import { lazy } from "react";
-import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 
@@ -17,67 +15,6 @@ const EducatorChat = lazy(() => import("@/pages/EducatorChat"));
 const ToolsDashboard = lazy(() => import("@/pages/ToolsDashboard"));
 
 const AppRoutes = () => {
-  const [initialPath, setInitialPath] = useState<string | null>(null);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [session, setSession] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const checkSessionAndPath = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (mounted) {
-          setSession(!!session);
-          if (session) {
-            // If user is authenticated and on the root path, redirect to /home
-            if (location.pathname === '/') {
-              navigate('/home', { replace: true });
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Session check error:', error);
-        if (mounted) {
-          setSession(false);
-        }
-      }
-    };
-
-    checkSessionAndPath();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (mounted) {
-        setSession(!!session);
-        if (!session && !['/', '/signin', '/pricing', '/teacher-reviews', '/challenge'].includes(location.pathname)) {
-          navigate('/signin');
-        } else if (session && location.pathname === '/') {
-          // Redirect to home when authenticated user lands on root path
-          navigate('/home', { replace: true });
-        }
-      }
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [location.pathname, navigate]);
-
-  // Public routes that don't require authentication
-  const publicRoutes = ['/pricing', '/teacher-reviews', '/challenge', '/signin'];
-
-  // If we're on a protected route and there's no session, redirect to signin
-  if (session === false && !publicRoutes.includes(location.pathname) && location.pathname !== '/') {
-    return <Navigate to="/signin" replace />;
-  }
-
-  // If authenticated user is on root path, redirect to home
-  if (session && location.pathname === '/') {
-    return <Navigate to="/home" replace />;
-  }
-
   return (
     <Routes>
       {/* Public routes */}

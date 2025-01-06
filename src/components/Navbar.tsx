@@ -30,9 +30,6 @@ const Navbar = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) {
         setSession(session);
-        if (!session && !location.pathname.startsWith('/signin')) {
-          navigate('/signin');
-        }
       }
     });
 
@@ -40,12 +37,12 @@ const Navbar = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate, location.pathname]);
+  }, []);
 
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      navigate("/signin", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Error signing out:", error);
     }
