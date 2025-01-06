@@ -13,15 +13,17 @@ const SignIn = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Check for stored redirect path first
         const redirectPath = localStorage.getItem('redirectPath');
         if (redirectPath) {
-          localStorage.removeItem('redirectPath'); // Clean up
+          localStorage.removeItem('redirectPath');
           navigate(redirectPath);
         } else {
-          // If no stored path, redirect to tools or use the location state
-          const from = (location.state as any)?.from?.pathname || '/tools';
-          navigate(from);
+          const lastPath = localStorage.getItem('lastPath');
+          if (lastPath) {
+            navigate(lastPath);
+          } else {
+            navigate('/tools');
+          }
         }
       }
     };
@@ -33,8 +35,12 @@ const SignIn = () => {
           localStorage.removeItem('redirectPath');
           navigate(redirectPath);
         } else {
-          const from = (location.state as any)?.from?.pathname || '/tools';
-          navigate(from);
+          const lastPath = localStorage.getItem('lastPath');
+          if (lastPath) {
+            navigate(lastPath);
+          } else {
+            navigate('/tools');
+          }
         }
       }
     });
@@ -42,7 +48,7 @@ const SignIn = () => {
     checkSession();
 
     return () => subscription.unsubscribe();
-  }, [navigate, location]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50">

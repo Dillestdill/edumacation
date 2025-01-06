@@ -46,31 +46,33 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Store the current path in localStorage when it changes
-    localStorage.setItem('lastPath', location.pathname);
-  }, [location]);
-
-  useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(!!session);
+
+      // If session exists, store the current path
+      if (session) {
+        localStorage.setItem('lastPath', location.pathname);
+      }
     };
 
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(!!session);
+      if (session) {
+        localStorage.setItem('lastPath', location.pathname);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [location]);
 
   if (session === null) {
     return <LoadingFallback />;
   }
 
   if (!session) {
-    // Store the attempted path before redirecting
     localStorage.setItem('redirectPath', location.pathname);
     return <Navigate to="/signin" replace state={{ from: location }} />;
   }
@@ -81,16 +83,26 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => {
   const [initialPath, setInitialPath] = useState<string | null>(null);
   const location = useLocation();
+  const [session, setSession] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // On initial load, check if there's a stored path
-    const storedPath = localStorage.getItem('lastPath');
-    if (storedPath && location.pathname === '/') {
-      setInitialPath(storedPath);
-    }
+    const checkSessionAndPath = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(!!session);
+
+      if (session) {
+        const storedPath = localStorage.getItem('lastPath');
+        if (storedPath && location.pathname === '/') {
+          setInitialPath(storedPath);
+        }
+      }
+    };
+
+    checkSessionAndPath();
   }, [location.pathname]);
 
-  if (initialPath) {
+  // If we have an initial path and the user is authenticated, redirect to it
+  if (initialPath && session) {
     return <Navigate to={initialPath} replace />;
   }
 
