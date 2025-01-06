@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Wrench } from "lucide-react";
 
 interface AuthenticatedNavProps {
@@ -6,7 +6,8 @@ interface AuthenticatedNavProps {
 }
 
 const AuthenticatedNav = ({ handleSignOut }: AuthenticatedNavProps) => {
-  const pathname = window.location.pathname;
+  const location = useLocation();
+  const pathname = location.pathname;
   
   return (
     <div className="flex items-center gap-8">
