@@ -32,6 +32,10 @@ export const useSubscription = () => {
         throw error;
       }
       
+      if (!data) {
+        throw new Error("No subscription data returned");
+      }
+      
       return data;
     },
     retry: 1,
