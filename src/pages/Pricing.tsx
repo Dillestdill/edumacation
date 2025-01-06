@@ -4,16 +4,21 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Pricing = () => {
   const { toast } = useToast();
   const { data: subscription } = useSubscription();
+  const navigate = useNavigate();
 
   const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        // Store the current path before redirecting
+        localStorage.setItem('redirectPath', '/pricing');
+        navigate('/signin');
         toast({
           title: "Please sign in first",
           description: "You need to be signed in to subscribe",
